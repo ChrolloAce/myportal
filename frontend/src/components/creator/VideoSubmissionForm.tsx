@@ -43,59 +43,7 @@ const Label = styled.label`
   font-size: ${theme.typography.fontSize.sm};
 `;
 
-const PlatformSelector = styled.div`
-  display: flex;
-  gap: ${theme.spacing[3]};
-`;
 
-const PlatformOption = styled.button<{ selected: boolean }>`
-  flex: 1;
-  padding: ${theme.spacing[3]} ${theme.spacing[4]};
-  border: 2px solid ${({ selected }) => 
-    selected ? theme.colors.primary[500] : theme.colors.neutral[300]};
-  border-radius: ${theme.borderRadius.md};
-  background: ${({ selected }) => 
-    selected ? theme.colors.primary[50] : theme.colors.neutral[0]};
-  color: ${({ selected }) => 
-    selected ? theme.colors.primary[700] : theme.colors.neutral[600]};
-  font-weight: ${theme.typography.fontWeight.medium};
-  transition: all ${theme.transitions.fast};
-  text-transform: capitalize;
-  
-  &:hover:not(:disabled) {
-    border-color: ${theme.colors.primary[400]};
-    background: ${theme.colors.primary[25]};
-  }
-`;
-
-const TextArea = styled.textarea`
-  width: 100%;
-  min-height: 80px;
-  padding: ${theme.spacing[3]} ${theme.spacing[4]};
-  border: 1px solid ${theme.colors.neutral[300]};
-  border-radius: ${theme.borderRadius.md};
-  background: ${theme.colors.neutral[0]};
-  color: ${theme.colors.neutral[800]};
-  font-family: inherit;
-  font-size: inherit;
-  resize: vertical;
-  transition: all ${theme.transitions.fast};
-  
-  &:focus {
-    outline: none;
-    border-color: ${theme.colors.primary[500]};
-    box-shadow: 0 0 0 3px ${theme.colors.primary[100]};
-  }
-  
-  &::placeholder {
-    color: ${theme.colors.neutral[400]};
-  }
-  
-  &:disabled {
-    background: ${theme.colors.neutral[100]};
-    cursor: not-allowed;
-  }
-`;
 
 const SubmitButton = styled(Button)`
   margin-top: ${theme.spacing[2]};
@@ -115,69 +63,65 @@ export const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
   onSubmit,
   isSubmitting
 }) => {
-  const [formData, setFormData] = useState<SubmissionFormData>({
-    videoUrl: '',
-    platform: Platform.TIKTOK,
-    caption: '',
-    hashtags: '',
-    notes: ''
-  });
-  
+  const [videoUrl, setVideoUrl] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
+
+  const detectPlatform = (url: string): Platform => {
+    const lowerUrl = url.toLowerCase();
+    if (lowerUrl.includes('tiktok.com') || lowerUrl.includes('vm.tiktok.com')) {
+      return Platform.TIKTOK;
+    }
+    if (lowerUrl.includes('instagram.com') || lowerUrl.includes('instagr.am')) {
+      return Platform.INSTAGRAM;
+    }
+    return Platform.TIKTOK; // Default to TikTok
+  };
+
+  const isValidUrl = (url: string): boolean => {
+    const lowerUrl = url.toLowerCase();
+    return (
+      (lowerUrl.includes('tiktok.com') || lowerUrl.includes('vm.tiktok.com')) ||
+      (lowerUrl.includes('instagram.com') || lowerUrl.includes('instagr.am'))
+    );
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.videoUrl) return;
+    if (!videoUrl.trim() || !isValidUrl(videoUrl)) return;
+
+    const platform = detectPlatform(videoUrl);
+    
+    const formData: SubmissionFormData = {
+      videoUrl: videoUrl.trim(),
+      platform,
+      caption: '',
+      hashtags: '',
+      notes: ''
+    };
 
     const success = await onSubmit(formData);
     
     if (success) {
       // Reset form and show success message
-      setFormData({
-        videoUrl: '',
-        platform: Platform.TIKTOK,
-        caption: '',
-        hashtags: '',
-        notes: ''
-      });
-      
+      setVideoUrl('');
       setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 3000);
+      setTimeout(() => setShowSuccess(false), 4000);
     }
   };
 
-  const handleChange = (field: keyof SubmissionFormData) => 
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setFormData(prev => ({
-        ...prev,
-        [field]: e.target.value
-      }));
-    };
-
-  const handlePlatformSelect = (platform: Platform) => {
-    setFormData(prev => ({ ...prev, platform }));
-  };
-
-  const detectPlatform = (url: string): Platform => {
-    if (url.toLowerCase().includes('tiktok')) return Platform.TIKTOK;
-    if (url.toLowerCase().includes('instagram')) return Platform.INSTAGRAM;
-    return formData.platform;
-  };
-
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const url = e.target.value;
-    const detectedPlatform = detectPlatform(url);
-    
-    setFormData(prev => ({
-      ...prev,
-      videoUrl: url,
-      platform: detectedPlatform
-    }));
+    setVideoUrl(e.target.value);
+  };
+
+  const getPlatformEmoji = (url: string): string => {
+    if (!url) return '🎬';
+    const platform = detectPlatform(url);
+    return platform === Platform.TIKTOK ? '🎵' : '📸';
   };
 
   return (
     <FormCard className="slide-in">
-      <FormTitle>Submit Your Video ✨</FormTitle>
+      <FormTitle>Submit Your Video {getPlatformEmoji(videoUrl)}</FormTitle>
       
       {showSuccess && (
         <SuccessMessage className="fade-in">
@@ -187,79 +131,33 @@ export const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
 
       <Form onSubmit={handleSubmit}>
         <InputGroup>
-          <Label htmlFor="videoUrl">Video URL *</Label>
+          <Label htmlFor="videoUrl">
+            Just paste your link {videoUrl && isValidUrl(videoUrl) ? `(${detectPlatform(videoUrl)} detected)` : ''}
+          </Label>
           <Input
             id="videoUrl"
             type="url"
-            value={formData.videoUrl}
+            value={videoUrl}
             onChange={handleUrlChange}
-            placeholder="Paste your TikTok or Instagram video URL"
+            placeholder="https://www.tiktok.com/... or https://www.instagram.com/..."
             disabled={isSubmitting}
             required
           />
-        </InputGroup>
-
-        <InputGroup>
-          <Label>Platform</Label>
-          <PlatformSelector>
-            <PlatformOption
-              type="button"
-              selected={formData.platform === Platform.TIKTOK}
-              onClick={() => handlePlatformSelect(Platform.TIKTOK)}
-              disabled={isSubmitting}
-            >
-              TikTok
-            </PlatformOption>
-            <PlatformOption
-              type="button"
-              selected={formData.platform === Platform.INSTAGRAM}
-              onClick={() => handlePlatformSelect(Platform.INSTAGRAM)}
-              disabled={isSubmitting}
-            >
-              Instagram
-            </PlatformOption>
-          </PlatformSelector>
-        </InputGroup>
-
-        <InputGroup>
-          <Label htmlFor="caption">Caption</Label>
-          <Input
-            id="caption"
-            type="text"
-            value={formData.caption}
-            onChange={handleChange('caption')}
-            placeholder="Add a caption for your video (optional)"
-            disabled={isSubmitting}
-          />
-        </InputGroup>
-
-        <InputGroup>
-          <Label htmlFor="hashtags">Hashtags</Label>
-          <Input
-            id="hashtags"
-            type="text"
-            value={formData.hashtags}
-            onChange={handleChange('hashtags')}
-            placeholder="#viral #content #creator (optional)"
-            disabled={isSubmitting}
-          />
-        </InputGroup>
-
-        <InputGroup>
-          <Label htmlFor="notes">Notes</Label>
-          <TextArea
-            id="notes"
-            value={formData.notes}
-            onChange={handleChange('notes')}
-            placeholder="Any additional notes or context (optional)"
-            disabled={isSubmitting}
-          />
+          {videoUrl && !isValidUrl(videoUrl) && (
+            <div style={{ 
+              color: theme.colors.error.main, 
+              fontSize: theme.typography.fontSize.sm,
+              marginTop: theme.spacing[1]
+            }}>
+              Please enter a valid TikTok or Instagram URL
+            </div>
+          )}
         </InputGroup>
 
         <SubmitButton
           type="submit"
           size="lg"
-          disabled={isSubmitting || !formData.videoUrl}
+          disabled={isSubmitting || !videoUrl.trim() || !isValidUrl(videoUrl)}
         >
           {isSubmitting ? (
             <>
@@ -267,7 +165,7 @@ export const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
               Submitting...
             </>
           ) : (
-            'Submit Video'
+            `Submit ${videoUrl && isValidUrl(videoUrl) ? detectPlatform(videoUrl) : 'Video'} 🚀`
           )}
         </SubmitButton>
       </Form>

@@ -4,7 +4,7 @@
  */
 
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { getAuth, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 // Firebase configuration
@@ -23,6 +23,13 @@ const app = initializeApp(firebaseConfig);
 // Initialize Firebase services
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+
+// Set authentication to persist across browser sessions
+// This ensures users stay logged in even after closing the browser
+setPersistence(auth, browserLocalPersistence).catch((error) => {
+  console.warn('Failed to set auth persistence:', error);
+  // Continue anyway - auth will still work, just might not persist as long
+});
 
 // Export the app instance
 export default app;

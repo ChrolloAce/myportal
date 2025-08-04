@@ -34,12 +34,26 @@ export class FirebaseAuthManager {
     this.googleProvider.addScope('email');
     this.googleProvider.addScope('profile');
 
-    // Listen to auth state changes
+    // Firebase Auth automatically persists authentication state
+    // This listener ensures we keep our app state synchronized
     onAuthStateChanged(auth, async (user) => {
       this.firebaseUser = user;
       if (user) {
-        // Load user profile from Firestore
-        this.currentUser = await this.loadUserProfile(user.uid);
+        try {
+          // Load user profile from Firestore
+          this.currentUser = await this.loadUserProfile(user.uid);
+        } catch (error) {
+          console.error('Failed to load user profile on auth state change:', error);
+          // Keep the user authenticated even if profile loading fails
+          this.currentUser = {
+            id: user.uid,
+            email: user.email || '',
+            username: user.displayName || 'User',
+            role: 'creator' as any, // Default role
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
+        }
       } else {
         this.currentUser = null;
       }
