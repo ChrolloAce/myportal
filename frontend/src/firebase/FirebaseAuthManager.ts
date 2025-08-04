@@ -27,6 +27,8 @@ export class FirebaseAuthManager {
   private currentUser: BaseUser | null = null;
   private firebaseUser: FirebaseUser | null = null;
   private googleProvider: GoogleAuthProvider;
+  private authInitialized: boolean = false;
+  private authInitPromise: Promise<void> | null = null;
 
   private constructor() {
     // Initialize Google provider
@@ -34,29 +36,38 @@ export class FirebaseAuthManager {
     this.googleProvider.addScope('email');
     this.googleProvider.addScope('profile');
 
-    // Firebase Auth automatically persists authentication state
-    // This listener ensures we keep our app state synchronized
-    onAuthStateChanged(auth, async (user) => {
-      this.firebaseUser = user;
-      if (user) {
-        try {
-          // Load user profile from Firestore
-          this.currentUser = await this.loadUserProfile(user.uid);
-        } catch (error) {
-          console.error('Failed to load user profile on auth state change:', error);
-          // Keep the user authenticated even if profile loading fails
-          this.currentUser = {
-            id: user.uid,
-            email: user.email || '',
-            username: user.displayName || 'User',
-            role: 'creator' as any, // Default role
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          };
+    // Create a single promise that resolves when auth is fully initialized
+    this.authInitPromise = new Promise((resolve) => {
+      // Firebase Auth automatically persists authentication state
+      // This listener ensures we keep our app state synchronized
+      onAuthStateChanged(auth, async (user) => {
+        this.firebaseUser = user;
+        if (user) {
+          try {
+            // Load user profile from Firestore
+            this.currentUser = await this.loadUserProfile(user.uid);
+          } catch (error) {
+            console.error('Failed to load user profile on auth state change:', error);
+            // Keep the user authenticated even if profile loading fails
+            this.currentUser = {
+              id: user.uid,
+              email: user.email || '',
+              username: user.displayName || 'User',
+              role: 'creator' as any, // Default role
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            };
+          }
+        } else {
+          this.currentUser = null;
         }
-      } else {
-        this.currentUser = null;
-      }
+        
+        // Mark auth as initialized and resolve the promise
+        if (!this.authInitialized) {
+          this.authInitialized = true;
+          resolve();
+        }
+      });
     });
   }
 
@@ -258,11 +269,16 @@ export class FirebaseAuthManager {
 
   // Helper method to wait for auth initialization
   public async waitForAuthInit(): Promise<FirebaseUser | null> {
-    return new Promise((resolve) => {
-      const unsubscribe = onAuthStateChanged(auth, (user) => {
-        unsubscribe();
-        resolve(user);
-      });
-    });
+    // If already initialized, return immediately
+    if (this.authInitialized) {
+      return this.firebaseUser;
+    }
+    
+    // Wait for the auth initialization promise to resolve
+    if (this.authInitPromise) {
+      await this.authInitPromise;
+    }
+    
+    return this.firebaseUser;
   }
 }

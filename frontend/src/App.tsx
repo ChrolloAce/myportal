@@ -41,11 +41,19 @@ const App: React.FC = () => {
     // Initialize app state and wait for Firebase auth
     const initializeApp = async () => {
       try {
-        // Wait for Firebase auth to initialize
+        console.log('🚀 Initializing app - waiting for Firebase auth...');
+        
+        // Wait for Firebase auth to fully initialize (including user profile loading)
         await authManager.waitForAuthInit();
         
         const isAuthenticated = authManager.isAuthenticated();
         const currentUser = authManager.getCurrentUser();
+        
+        console.log('✅ Firebase auth initialized:', { 
+          isAuthenticated, 
+          userRole: currentUser?.role,
+          userEmail: currentUser?.email 
+        });
 
         setState({
           isLoading: false,
@@ -55,7 +63,7 @@ const App: React.FC = () => {
           error: null
         });
       } catch (error) {
-        console.error('App initialization error:', error);
+        console.error('❌ App initialization error:', error);
         setState({
           isLoading: false,
           isAuthenticated: false,
