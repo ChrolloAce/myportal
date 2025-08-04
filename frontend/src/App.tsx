@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 import { theme } from './styles/theme';
 import { GlobalStyles } from './styles/GlobalStyles';
@@ -16,9 +16,26 @@ import { OnboardingWizard } from './components/onboarding/OnboardingWizard';
 import { CreatorDashboard } from './components/creator/CreatorDashboardModern';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { LoadingSpinner } from './components/shared/LoadingSpinner';
+import { InviteLanding } from './components/invite/InviteLanding';
 import { LoginCredentials, RegisterData, UserRole, CreatorUser, AdminUser, CreatorOnboardingData, AdminOnboardingData, CorporationOnboarding } from './types';
 
 type AppUser = CreatorUser | AdminUser;
+
+// Wrapper component for invite route to properly extract params
+const InviteRoute: React.FC<{ onJoinSuccess: () => void }> = ({ onJoinSuccess }) => {
+  const { inviteCode } = useParams<{ inviteCode: string }>();
+  
+  if (!inviteCode) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return (
+    <InviteLanding
+      inviteCode={inviteCode}
+      onJoinSuccess={onJoinSuccess}
+    />
+  );
+};
 
 interface AppState {
   isLoading: boolean;
@@ -312,6 +329,18 @@ const App: React.FC = () => {
               ) : (
                 <Navigate to={getDefaultRoute()} replace />
               )
+            }
+          />
+          
+          <Route
+            path="/invite/:inviteCode"
+            element={
+              <InviteRoute
+                onJoinSuccess={() => {
+                  // Force app to re-check authentication and routing
+                  window.location.reload();
+                }}
+              />
             }
           />
           

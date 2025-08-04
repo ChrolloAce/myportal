@@ -14,13 +14,14 @@ import { AdminOverview } from './AdminOverview';
 import { UserManagement } from './UserManagement';
 import { AdminStatistics } from './AdminStatistics';
 import { CorporationMembers } from './CorporationMembers';
+import { InviteManagement } from './InviteManagement';
 
 interface AdminDashboardProps {
   user: AdminUser;
   onLogout: () => void;
 }
 
-type AdminView = 'overview' | 'submissions' | 'statistics' | 'users' | 'members' | 'settings';
+type AdminView = 'overview' | 'submissions' | 'statistics' | 'users' | 'members' | 'invites' | 'settings';
 
 const DashboardContainer = styled.div`
   display: flex;
@@ -128,6 +129,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           title: 'Corporation Members',
           subtitle: 'Manage your corporation members, creators, and team.'
         };
+      case 'invites':
+        return {
+          title: 'Invite Management',
+          subtitle: 'Create and manage invitation links for your corporation.'
+        };
       case 'settings':
         return {
           title: 'Platform Settings',
@@ -191,6 +197,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             user={user}
             corporationId={user.corporationId}
           />
+        ) : (
+          <div>No corporation found. Please complete your onboarding process.</div>
+        );
+      case 'invites':
+        return user.corporationId ? (
+          <InviteManagement user={user} />
         ) : (
           <div>No corporation found. Please complete your onboarding process.</div>
         );

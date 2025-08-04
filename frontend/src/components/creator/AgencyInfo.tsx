@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { FirebaseCorporationManager } from '../../firebase/FirebaseCorporationManager';
 import { Corporation, CorporationMember, CreatorUser } from '../../types';
+import { CorporationBrowser } from './CorporationBrowser';
 
 interface AgencyInfoProps {
   user: CreatorUser;
@@ -299,6 +300,7 @@ export const AgencyInfo: React.FC<AgencyInfoProps> = ({ user }) => {
   const [corporation, setCorporation] = useState<Corporation | null>(null);
   const [members, setMembers] = useState<MemberWithProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showBrowser, setShowBrowser] = useState(false);
   const corporationManager = FirebaseCorporationManager.getInstance();
 
   useEffect(() => {
@@ -353,6 +355,12 @@ export const AgencyInfo: React.FC<AgencyInfoProps> = ({ user }) => {
     }
   };
 
+  const handleJoinSuccess = () => {
+    setShowBrowser(false);
+    // Force a reload to show the new agency
+    window.location.reload();
+  };
+
   if (isLoading) {
     return (
       <AgencyContainer>
@@ -364,6 +372,16 @@ export const AgencyInfo: React.FC<AgencyInfoProps> = ({ user }) => {
   }
 
   if (!user.corporationId || !corporation) {
+    if (showBrowser) {
+      return (
+        <CorporationBrowser
+          user={user}
+          onBack={() => setShowBrowser(false)}
+          onJoinSuccess={handleJoinSuccess}
+        />
+      );
+    }
+
     return (
       <AgencyContainer>
         <NoAgencyCard>
@@ -373,7 +391,7 @@ export const AgencyInfo: React.FC<AgencyInfoProps> = ({ user }) => {
             Connect with brands and agencies to collaborate on exciting content projects. 
             Join an agency to access exclusive opportunities and work with fellow creators.
           </NoAgencyDescription>
-          <JoinButton>
+          <JoinButton onClick={() => setShowBrowser(true)}>
             <UserPlus size={20} />
             Find Agencies
           </JoinButton>

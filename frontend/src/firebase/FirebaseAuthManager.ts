@@ -281,4 +281,22 @@ export class FirebaseAuthManager {
     
     return this.firebaseUser;
   }
+
+  // Refresh user profile from Firestore (for after profile updates)
+  public async refreshUserProfile(): Promise<BaseUser | null> {
+    if (!this.firebaseUser) {
+      return null;
+    }
+
+    try {
+      const refreshedProfile = await this.loadUserProfile(this.firebaseUser.uid);
+      if (refreshedProfile) {
+        this.currentUser = refreshedProfile;
+      }
+      return refreshedProfile;
+    } catch (error) {
+      console.error('Failed to refresh user profile:', error);
+      return this.currentUser;
+    }
+  }
 }

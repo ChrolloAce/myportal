@@ -5,7 +5,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { BarChart3, Users, FileText, Settings, LogOut, Home } from 'lucide-react';
+import { BarChart3, Users, FileText, Settings, LogOut, Home, UserPlus } from 'lucide-react';
 import { theme } from '../../styles/theme';
 import { AdminUser } from '../../types';
 
@@ -171,6 +171,11 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       id: 'members',
       label: 'Members',
       icon: Users
+    },
+    {
+      id: 'invites',
+      label: 'Invites',
+      icon: UserPlus
     },
     {
       id: 'statistics',

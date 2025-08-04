@@ -92,9 +92,12 @@ export class FirebaseOnboardingManager {
 
       console.log('✅ Creator onboarding completed successfully');
 
-      // Return updated user data
-      const currentUser = this.authManager.getCurrentUser();
-      return { ...currentUser, ...creatorData } as CreatorUser;
+      // Refresh user profile from Firestore to get the latest data
+      const refreshedUser = await this.authManager.refreshUserProfile();
+      if (!refreshedUser) {
+        throw new Error('Failed to refresh user profile after onboarding');
+      }
+      return refreshedUser as CreatorUser;
 
     } catch (error) {
       console.error('❌ Error completing creator onboarding:', error);
@@ -137,9 +140,12 @@ export class FirebaseOnboardingManager {
 
       console.log('✅ Admin onboarding completed successfully');
 
-      // Return updated user data
-      const currentUser = this.authManager.getCurrentUser();
-      return { ...currentUser, ...adminData } as AdminUser;
+      // Refresh user profile from Firestore to get the latest data
+      const refreshedUser = await this.authManager.refreshUserProfile();
+      if (!refreshedUser) {
+        throw new Error('Failed to refresh user profile after onboarding');
+      }
+      return refreshedUser as AdminUser;
 
     } catch (error) {
       console.error('❌ Error completing admin onboarding:', error);

@@ -473,4 +473,74 @@ export class FirebaseCorporationManager {
       throw error;
     }
   }
+
+  // Find public corporations that allow joining
+  async getPublicCorporations(): Promise<Corporation[]> {
+    try {
+      const corporationsQuery = query(
+        collection(db, 'corporations'),
+        where('settings.allowPublicJoin', '==', true),
+        orderBy('memberCount', 'desc'),
+        limit(50)
+      );
+      
+      const snapshot = await getDocs(corporationsQuery);
+      const corporations: Corporation[] = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      } as Corporation));
+
+      return corporations;
+    } catch (error) {
+      console.error('Error fetching public corporations:', error);
+      return [];
+    }
+  }
+
+  // Join a public corporation (without invite)
+  async joinPublicCorporation(userId: string, corporationId: string): Promise<void> {
+    try {
+      // Get corporation to check if it allows public joining
+      const corporation = await this.getCorporation(corporationId);
+      if (!corporation) {
+        throw new Error('Corporation not found');
+      }
+
+      if (!corporation.settings.allowPublicJoin) {
+        throw new Error('This corporation does not allow public joining');
+      }
+
+      // Check if user is already a member
+      const existingMember = await this.getUserMembership(userId);
+      if (existingMember) {
+        throw new Error('You are already a member of a corporation');
+      }
+
+      const batch = writeBatch(db);
+
+      // Add user as member
+      const memberData: Omit<CorporationMember, 'id'> = {
+        userId,
+        corporationId,
+        role: 'creator',
+        joinedAt: new Date().toISOString(),
+        status: corporation.settings.requireApproval ? 'pending' : 'active'
+      };
+
+      const memberRef = doc(collection(db, 'corporationMembers'));
+      batch.set(memberRef, memberData);
+
+      // Update corporation member count
+      const corporationRef = doc(db, 'corporations', corporationId);
+      batch.update(corporationRef, {
+        memberCount: corporation.memberCount + 1,
+        updatedAt: serverTimestamp()
+      });
+
+      await batch.commit();
+    } catch (error) {
+      console.error('Error joining public corporation:', error);
+      throw error;
+    }
+  }
 }
