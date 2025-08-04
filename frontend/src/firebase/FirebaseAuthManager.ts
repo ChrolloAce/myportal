@@ -6,6 +6,8 @@
 import { 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
   signOut,
   onAuthStateChanged,
   User as FirebaseUser,
@@ -24,8 +26,14 @@ export class FirebaseAuthManager {
   private static instance: FirebaseAuthManager;
   private currentUser: BaseUser | null = null;
   private firebaseUser: FirebaseUser | null = null;
+  private googleProvider: GoogleAuthProvider;
 
   private constructor() {
+    // Initialize Google provider
+    this.googleProvider = new GoogleAuthProvider();
+    this.googleProvider.addScope('email');
+    this.googleProvider.addScope('profile');
+
     // Listen to auth state changes
     onAuthStateChanged(auth, async (user) => {
       this.firebaseUser = user;
@@ -112,6 +120,59 @@ export class FirebaseAuthManager {
     }
   }
 
+  public async signInWithGoogle(role: UserRole = UserRole.CREATOR): Promise<FirebaseAuthResponse> {
+    try {
+      const result = await signInWithPopup(auth, this.googleProvider);
+      const firebaseUser = result.user;
+
+      // Check if user profile exists
+      let userProfile = await this.loadUserProfile(firebaseUser.uid);
+
+      if (!userProfile) {
+        // Create new user profile for first-time Google users
+        const displayName = firebaseUser.displayName || 'Google User';
+        const username = displayName.toLowerCase().replace(/\s+/g, '') + Math.random().toString(36).substr(2, 4);
+
+        userProfile = {
+          id: firebaseUser.uid,
+          email: firebaseUser.email || '',
+          username,
+          role,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+
+        // Add role-specific fields
+        const profileData = {
+          ...userProfile,
+          displayName,
+          photoURL: firebaseUser.photoURL,
+          ...(role === UserRole.CREATOR ? {
+            isActive: true,
+            totalSubmissions: 0,
+            approvedSubmissions: 0
+          } : {
+            permissions: ['manage_submissions', 'view_analytics']
+          })
+        };
+
+        await setDoc(doc(db, 'users', firebaseUser.uid), profileData);
+      }
+
+      this.currentUser = userProfile;
+
+      return {
+        user: userProfile,
+        firebaseUser
+      };
+    } catch (error: any) {
+      if (error.code === 'auth/popup-closed-by-user') {
+        throw new Error('Sign-in was cancelled');
+      }
+      throw new Error(this.getAuthErrorMessage(error.code));
+    }
+  }
+
   public async logout(): Promise<void> {
     try {
       await signOut(auth);
@@ -168,6 +229,14 @@ export class FirebaseAuthManager {
         return 'Invalid email address';
       case 'auth/too-many-requests':
         return 'Too many failed attempts. Please try again later';
+      case 'auth/popup-blocked':
+        return 'Pop-up blocked. Please allow pop-ups and try again';
+      case 'auth/popup-closed-by-user':
+        return 'Sign-in was cancelled';
+      case 'auth/account-exists-with-different-credential':
+        return 'An account already exists with the same email but different sign-in method';
+      case 'auth/operation-not-allowed':
+        return 'This sign-in method is not enabled. Please contact support';
       default:
         return 'Authentication failed. Please try again';
     }

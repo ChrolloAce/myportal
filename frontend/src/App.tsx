@@ -114,6 +114,29 @@ const App: React.FC = () => {
     }
   };
 
+  const handleGoogleSignIn = async (): Promise<void> => {
+    setState(prev => ({ ...prev, error: null }));
+    
+    try {
+      const response = await authManager.signInWithGoogle();
+      
+      setState({
+        isLoading: false,
+        isAuthenticated: true,
+        currentUser: response.user as AppUser,
+        showRegister: false,
+        error: null
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Google sign-in failed';
+      setState(prev => ({
+        ...prev,
+        error: errorMessage
+      }));
+      throw error;
+    }
+  };
+
   const handleLogout = (): void => {
     authManager.logout();
     setState({
@@ -176,6 +199,7 @@ const App: React.FC = () => {
               ) : (
                 <LoginForm
                   onLogin={handleLogin}
+                  onGoogleSignIn={handleGoogleSignIn}
                   onSwitchToRegister={switchToRegister}
                   isLoading={state.isLoading}
                   error={state.error}
