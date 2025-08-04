@@ -26,7 +26,8 @@ import {
   SubmissionStats,
   AdminAction,
   PaginatedResponse,
-  SubmissionStatus
+  SubmissionStatus,
+  Platform
 } from '../types';
 
 export interface SubmissionWithId extends VideoSubmission {
@@ -55,46 +56,72 @@ export class FirebaseSubmissionManager {
     }
 
     try {
-      // Check for duplicate URLs
-      const duplicateQuery = query(
-        collection(db, 'submissions'),
-        where('videoUrl', '==', formData.videoUrl)
-      );
-      const duplicateSnapshot = await getDocs(duplicateQuery);
+      const urls: { url: string; platform: Platform }[] = [];
       
-      if (!duplicateSnapshot.empty) {
-        throw new Error('This video URL has already been submitted');
+      // Collect all valid URLs
+      if (formData.tiktokUrl?.trim()) {
+        urls.push({ url: formData.tiktokUrl.trim(), platform: Platform.TIKTOK });
+      }
+      if (formData.instagramUrl?.trim()) {
+        urls.push({ url: formData.instagramUrl.trim(), platform: Platform.INSTAGRAM });
       }
 
-      const submissionData = {
-        creatorId: currentUser.id,
-        creatorUsername: currentUser.username,
-        videoUrl: formData.videoUrl,
-        platform: formData.platform,
-        caption: formData.caption || '',
-        hashtags: this.parseHashtags(formData.hashtags || ''),
-        notes: formData.notes || '',
-        status: SubmissionStatus.PENDING,
-        submittedAt: Timestamp.now(),
-        updatedAt: Timestamp.now()
-      };
+      if (urls.length === 0) {
+        throw new Error('At least one URL must be provided');
+      }
 
-      const docRef = await addDoc(collection(db, 'submissions'), submissionData);
+      // Check for duplicate URLs
+      for (const { url } of urls) {
+        const duplicateQuery = query(
+          collection(db, 'submissions'),
+          where('videoUrl', '==', url)
+        );
+        const duplicateSnapshot = await getDocs(duplicateQuery);
+        
+        if (!duplicateSnapshot.empty) {
+          throw new Error(`This URL has already been submitted: ${url}`);
+        }
+      }
+
+      const submissions: VideoSubmission[] = [];
+      let submissionCount = 0;
+
+      // Create a submission for each URL
+      for (const { url, platform } of urls) {
+        const submissionData = {
+          creatorId: currentUser.id,
+          creatorUsername: currentUser.username,
+          videoUrl: url,
+          platform,
+          caption: formData.caption || '',
+          hashtags: this.parseHashtags(formData.hashtags || ''),
+          notes: formData.notes || '',
+          status: SubmissionStatus.PENDING,
+          submittedAt: Timestamp.now(),
+          updatedAt: Timestamp.now()
+        };
+
+        const docRef = await addDoc(collection(db, 'submissions'), submissionData);
+        submissionCount++;
+
+        submissions.push({
+          id: docRef.id,
+          ...submissionData,
+          submittedAt: submissionData.submittedAt.toDate().toISOString(),
+          updatedAt: submissionData.updatedAt.toDate().toISOString()
+        } as VideoSubmission);
+      }
 
       // Update user's submission count
       const userDocRef = doc(db, 'users', currentUser.id);
       await updateDoc(userDocRef, {
-        totalSubmissions: increment(1),
+        totalSubmissions: increment(submissionCount),
         updatedAt: Timestamp.now()
       });
 
-      // Return the submission with generated ID
-      return {
-        id: docRef.id,
-        ...submissionData,
-        submittedAt: submissionData.submittedAt.toDate().toISOString(),
-        updatedAt: submissionData.updatedAt.toDate().toISOString()
-      } as VideoSubmission;
+      // Return the first submission for backward compatibility
+      // In the future, we might want to return all submissions
+      return submissions[0];
 
     } catch (error) {
       throw new Error(error instanceof Error ? error.message : 'Submission failed');

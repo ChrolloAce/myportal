@@ -32,6 +32,15 @@ export interface VideoSubmission {
 }
 
 export interface SubmissionFormData {
+  tiktokUrl?: string;
+  instagramUrl?: string;
+  caption?: string;
+  hashtags?: string;
+  notes?: string;
+}
+
+// Legacy interface for backward compatibility
+export interface LegacySubmissionFormData {
   videoUrl: string;
   platform: Platform;
   caption?: string;

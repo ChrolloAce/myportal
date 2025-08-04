@@ -8,7 +8,7 @@ import styled from 'styled-components';
 import { theme } from '../../styles/theme';
 import { Card, Button, Input } from '../../styles/GlobalStyles';
 import { LoadingSpinner } from '../shared/LoadingSpinner';
-import { SubmissionFormData, Platform } from '../../types';
+import { SubmissionFormData } from '../../types';
 
 interface VideoSubmissionFormProps {
   onSubmit: (data: SubmissionFormData) => Promise<boolean>;
@@ -63,101 +63,149 @@ export const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
   onSubmit,
   isSubmitting
 }) => {
-  const [videoUrl, setVideoUrl] = useState('');
+  const [formData, setFormData] = useState<SubmissionFormData>({
+    tiktokUrl: '',
+    instagramUrl: '',
+    caption: '',
+    hashtags: '',
+    notes: ''
+  });
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const detectPlatform = (url: string): Platform => {
+  const isValidTikTokUrl = (url: string): boolean => {
+    if (!url.trim()) return true; // Empty is valid (optional)
     const lowerUrl = url.toLowerCase();
-    if (lowerUrl.includes('tiktok.com') || lowerUrl.includes('vm.tiktok.com')) {
-      return Platform.TIKTOK;
-    }
-    if (lowerUrl.includes('instagram.com') || lowerUrl.includes('instagr.am')) {
-      return Platform.INSTAGRAM;
-    }
-    return Platform.TIKTOK; // Default to TikTok
+    return lowerUrl.includes('tiktok.com') || lowerUrl.includes('vm.tiktok.com');
   };
 
-  const isValidUrl = (url: string): boolean => {
+  const isValidInstagramUrl = (url: string): boolean => {
+    if (!url.trim()) return true; // Empty is valid (optional)
     const lowerUrl = url.toLowerCase();
+    return lowerUrl.includes('instagram.com') || lowerUrl.includes('instagr.am');
+  };
+
+  const hasAtLeastOneUrl = (): boolean => {
+    return (formData.tiktokUrl?.trim() || formData.instagramUrl?.trim()) ? true : false;
+  };
+
+  const isFormValid = (): boolean => {
     return (
-      (lowerUrl.includes('tiktok.com') || lowerUrl.includes('vm.tiktok.com')) ||
-      (lowerUrl.includes('instagram.com') || lowerUrl.includes('instagr.am'))
+      hasAtLeastOneUrl() &&
+      isValidTikTokUrl(formData.tiktokUrl || '') &&
+      isValidInstagramUrl(formData.instagramUrl || '')
     );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!videoUrl.trim() || !isValidUrl(videoUrl)) return;
-
-    const platform = detectPlatform(videoUrl);
-    
-    const formData: SubmissionFormData = {
-      videoUrl: videoUrl.trim(),
-      platform,
-      caption: '',
-      hashtags: '',
-      notes: ''
-    };
+    if (!isFormValid()) return;
 
     const success = await onSubmit(formData);
     
     if (success) {
       // Reset form and show success message
-      setVideoUrl('');
+      setFormData({
+        tiktokUrl: '',
+        instagramUrl: '',
+        caption: '',
+        hashtags: '',
+        notes: ''
+      });
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 4000);
     }
   };
 
-  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setVideoUrl(e.target.value);
-  };
+  const handleChange = (field: keyof SubmissionFormData) => 
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setFormData(prev => ({
+        ...prev,
+        [field]: e.target.value
+      }));
+    };
 
-  const getPlatformEmoji = (url: string): string => {
-    if (!url) return '🎬';
-    const platform = detectPlatform(url);
-    return platform === Platform.TIKTOK ? '🎵' : '📸';
+  const getFormEmoji = (): string => {
+    const hasTikTok = formData.tiktokUrl?.trim();
+    const hasInstagram = formData.instagramUrl?.trim();
+    
+    if (hasTikTok && hasInstagram) return '🎬'; // Both platforms
+    if (hasTikTok) return '🎵'; // TikTok only
+    if (hasInstagram) return '📸'; // Instagram only
+    return '✨'; // Default
   };
 
   return (
     <FormCard className="slide-in">
-      <FormTitle>Submit Your Video {getPlatformEmoji(videoUrl)}</FormTitle>
+      <FormTitle>Submit Your Content {getFormEmoji()}</FormTitle>
       
       {showSuccess && (
         <SuccessMessage className="fade-in">
-          🎉 Video submitted successfully! We'll review it shortly.
+          🎉 Content submitted successfully! We'll review it shortly.
         </SuccessMessage>
       )}
 
       <Form onSubmit={handleSubmit}>
         <InputGroup>
-          <Label htmlFor="videoUrl">
-            Just paste your link {videoUrl && isValidUrl(videoUrl) ? `(${detectPlatform(videoUrl)} detected)` : ''}
+          <Label htmlFor="tiktokUrl">
+            🎵 TikTok URL (optional)
           </Label>
           <Input
-            id="videoUrl"
+            id="tiktokUrl"
             type="url"
-            value={videoUrl}
-            onChange={handleUrlChange}
-            placeholder="https://www.tiktok.com/... or https://www.instagram.com/..."
+            value={formData.tiktokUrl || ''}
+            onChange={handleChange('tiktokUrl')}
+            placeholder="https://www.tiktok.com/@user/video/..."
             disabled={isSubmitting}
-            required
           />
-          {videoUrl && !isValidUrl(videoUrl) && (
+          {formData.tiktokUrl && !isValidTikTokUrl(formData.tiktokUrl) && (
             <div style={{ 
               color: theme.colors.error.main, 
               fontSize: theme.typography.fontSize.sm,
               marginTop: theme.spacing[1]
             }}>
-              Please enter a valid TikTok or Instagram URL
+              Please enter a valid TikTok URL
             </div>
           )}
         </InputGroup>
 
+        <InputGroup>
+          <Label htmlFor="instagramUrl">
+            📸 Instagram URL (optional)
+          </Label>
+          <Input
+            id="instagramUrl"
+            type="url"
+            value={formData.instagramUrl || ''}
+            onChange={handleChange('instagramUrl')}
+            placeholder="https://www.instagram.com/p/..."
+            disabled={isSubmitting}
+          />
+          {formData.instagramUrl && !isValidInstagramUrl(formData.instagramUrl) && (
+            <div style={{ 
+              color: theme.colors.error.main, 
+              fontSize: theme.typography.fontSize.sm,
+              marginTop: theme.spacing[1]
+            }}>
+              Please enter a valid Instagram URL
+            </div>
+          )}
+        </InputGroup>
+
+        {!hasAtLeastOneUrl() && (formData.tiktokUrl !== '' || formData.instagramUrl !== '') && (
+          <div style={{ 
+            color: theme.colors.error.main, 
+            fontSize: theme.typography.fontSize.sm,
+            textAlign: 'center',
+            marginBottom: theme.spacing[2]
+          }}>
+            Please provide at least one valid URL (TikTok or Instagram)
+          </div>
+        )}
+
         <SubmitButton
           type="submit"
           size="lg"
-          disabled={isSubmitting || !videoUrl.trim() || !isValidUrl(videoUrl)}
+          disabled={isSubmitting || !isFormValid()}
         >
           {isSubmitting ? (
             <>
@@ -165,7 +213,7 @@ export const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
               Submitting...
             </>
           ) : (
-            `Submit ${videoUrl && isValidUrl(videoUrl) ? detectPlatform(videoUrl) : 'Video'} 🚀`
+            `Submit ${hasAtLeastOneUrl() ? 'Content' : 'Videos'} 🚀`
           )}
         </SubmitButton>
       </Form>
