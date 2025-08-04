@@ -36,6 +36,7 @@ export interface Corporation {
 }
 
 export interface CorporationMember {
+  id: string;
   userId: string;
   corporationId: string;
   role: 'owner' | 'admin' | 'creator';

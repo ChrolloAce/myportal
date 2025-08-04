@@ -384,4 +384,93 @@ export class FirebaseCorporationManager {
       };
     }
   }
+
+  // Get invite by code
+  async getInviteByCode(inviteCode: string): Promise<CorporationInvite | null> {
+    try {
+      const invitesRef = collection(db, 'corporationInvites');
+      const q = query(invitesRef, where('code', '==', inviteCode));
+      const querySnapshot = await getDocs(q);
+      
+      if (querySnapshot.empty) {
+        return null;
+      }
+      
+      const doc = querySnapshot.docs[0];
+      return {
+        id: doc.id,
+        ...doc.data()
+      } as CorporationInvite;
+    } catch (error) {
+      console.error('Error getting invite by code:', error);
+      throw error;
+    }
+  }
+
+  // Join corporation with invite code
+  async joinCorporationWithInvite(inviteCode: string, userId: string): Promise<void> {
+    try {
+      const batch = writeBatch(db);
+      
+      // Get the invite
+      const invite = await this.getInviteByCode(inviteCode);
+      if (!invite) {
+        throw new Error('Invite not found');
+      }
+
+      // Validate invite
+      if (!invite.isActive) {
+        throw new Error('Invite is not active');
+      }
+
+      if (invite.expiresAt && new Date(invite.expiresAt) < new Date()) {
+        throw new Error('Invite has expired');
+      }
+
+      if (invite.maxUses && invite.currentUses >= invite.maxUses) {
+        throw new Error('Invite has reached its usage limit');
+      }
+
+      // Get corporation to check approval requirements
+      const corporation = await this.getCorporation(invite.corporationId);
+      if (!corporation) {
+        throw new Error('Corporation not found');
+      }
+      
+      // Add user as member
+      const memberData: Omit<CorporationMember, 'id'> = {
+        userId,
+        corporationId: invite.corporationId,
+        role: 'creator',
+        status: corporation.settings.requireApproval ? 'pending' : 'active',
+        joinedAt: new Date().toISOString(),
+        invitedBy: invite.createdBy
+      };
+
+      const membersRef = collection(db, 'corporationMembers');
+      const memberDocRef = doc(membersRef);
+      batch.set(memberDocRef, memberData);
+
+      // Update invite usage count
+      const inviteDocRef = doc(db, 'corporationInvites', invite.id);
+      batch.update(inviteDocRef, {
+        currentUses: invite.currentUses + 1
+      });
+
+      // Update corporation member count
+      const corporationDocRef = doc(db, 'corporations', invite.corporationId);
+      const corporationDoc = await getDoc(corporationDocRef);
+      if (corporationDoc.exists()) {
+        const currentCount = corporationDoc.data().memberCount || 0;
+        batch.update(corporationDocRef, {
+          memberCount: currentCount + 1
+        });
+      }
+
+      await batch.commit();
+    } catch (error) {
+      console.error('Error joining corporation with invite:', error);
+      throw error;
+    }
+  }
 }

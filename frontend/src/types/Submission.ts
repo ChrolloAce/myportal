@@ -37,6 +37,7 @@ export interface SubmissionFormData {
   caption?: string;
   hashtags?: string;
   notes?: string;
+  corporationId?: string;
 }
 
 // Legacy interface for backward compatibility

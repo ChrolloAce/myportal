@@ -3,14 +3,16 @@
  * Single-purpose component for video URL submission
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { theme } from '../../styles/theme';
 import { Card, Button, Input } from '../../styles/GlobalStyles';
 import { LoadingSpinner } from '../shared/LoadingSpinner';
-import { SubmissionFormData } from '../../types';
+import { SubmissionFormData, CreatorUser, Corporation } from '../../types';
+import { FirebaseCorporationManager } from '../../firebase/FirebaseCorporationManager';
 
 interface VideoSubmissionFormProps {
+  user: CreatorUser;
   onSubmit: (data: SubmissionFormData) => Promise<boolean>;
   isSubmitting: boolean;
 }
@@ -59,7 +61,61 @@ const SuccessMessage = styled.div`
   font-weight: ${theme.typography.fontWeight.medium};
 `;
 
+const Select = styled.select`
+  width: 100%;
+  padding: ${theme.spacing[3]};
+  border: 2px solid ${theme.colors.neutral[200]};
+  border-radius: ${theme.borderRadius.md};
+  font-size: ${theme.typography.fontSize.base};
+  background: ${theme.colors.neutral[0]};
+  color: ${theme.colors.neutral[900]};
+  transition: all ${theme.transitions.fast};
+  
+  &:focus {
+    outline: none;
+    border-color: ${theme.colors.primary[400]};
+    box-shadow: 0 0 0 3px ${theme.colors.primary[100]};
+  }
+`;
+
+const NoAgencyCard = styled.div`
+  background: linear-gradient(135deg, ${theme.colors.warning.light} 0%, ${theme.colors.warning.light}40 100%);
+  border: 2px solid ${theme.colors.warning.light};
+  border-radius: ${theme.borderRadius.lg};
+  padding: ${theme.spacing[6]};
+  text-align: center;
+  margin-bottom: ${theme.spacing[6]};
+`;
+
+const NoAgencyTitle = styled.h3`
+  color: ${theme.colors.warning.dark};
+  font-weight: ${theme.typography.fontWeight.bold};
+  margin-bottom: ${theme.spacing[2]};
+`;
+
+const NoAgencyDescription = styled.p`
+  color: ${theme.colors.warning.dark};
+  margin-bottom: ${theme.spacing[4]};
+`;
+
+const JoinAgencyButton = styled.button`
+  background: ${theme.colors.primary[500]};
+  color: white;
+  border: none;
+  padding: ${theme.spacing[3]} ${theme.spacing[6]};
+  border-radius: ${theme.borderRadius.md};
+  font-weight: ${theme.typography.fontWeight.semibold};
+  cursor: pointer;
+  transition: all ${theme.transitions.fast};
+  
+  &:hover {
+    background: ${theme.colors.primary[600]};
+    transform: translateY(-1px);
+  }
+`;
+
 export const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
+  user,
   onSubmit,
   isSubmitting
 }) => {
@@ -68,9 +124,34 @@ export const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
     instagramUrl: '',
     caption: '',
     hashtags: '',
-    notes: ''
+    notes: '',
+    corporationId: user.corporationId || undefined
   });
   const [showSuccess, setShowSuccess] = useState(false);
+  const [corporation, setCorporation] = useState<Corporation | null>(null);
+  const [isLoadingCorporation, setIsLoadingCorporation] = useState(false);
+  
+  const corporationManager = FirebaseCorporationManager.getInstance();
+
+  useEffect(() => {
+    if (user.corporationId) {
+      loadCorporationInfo();
+    }
+  }, [user.corporationId]);
+
+  const loadCorporationInfo = async () => {
+    if (!user.corporationId) return;
+    
+    try {
+      setIsLoadingCorporation(true);
+      const corpData = await corporationManager.getCorporation(user.corporationId);
+      setCorporation(corpData);
+    } catch (error) {
+      console.error('Error loading corporation:', error);
+    } finally {
+      setIsLoadingCorporation(false);
+    }
+  };
 
   const isValidTikTokUrl = (url: string): boolean => {
     if (!url.trim()) return true; // Empty is valid (optional)
@@ -134,6 +215,24 @@ export const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
     return '✨'; // Default
   };
 
+  // Show no agency prompt if user has no corporation
+  if (!user.corporationId) {
+    return (
+      <FormCard className="slide-in">
+        <NoAgencyCard>
+          <NoAgencyTitle>🏢 Join an Agency First</NoAgencyTitle>
+          <NoAgencyDescription>
+            To submit content, you need to be part of an agency or brand. 
+            Join an agency to start collaborating and submitting your amazing content!
+          </NoAgencyDescription>
+          <JoinAgencyButton onClick={() => {/* TODO: Navigate to agency joining */}}>
+            Find Agencies to Join
+          </JoinAgencyButton>
+        </NoAgencyCard>
+      </FormCard>
+    );
+  }
+
   return (
     <FormCard className="slide-in">
       <FormTitle>Submit Your Content {getFormEmoji()}</FormTitle>
@@ -142,6 +241,30 @@ export const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
         <SuccessMessage className="fade-in">
           🎉 Content submitted successfully! We'll review it shortly.
         </SuccessMessage>
+      )}
+
+      {/* Agency Selection */}
+      {corporation && (
+        <InputGroup>
+          <Label>
+            🏢 Submitting for Agency
+          </Label>
+          <Select
+            value={user.corporationId || ''}
+            disabled={true}
+          >
+            <option value={user.corporationId || ''}>
+              {isLoadingCorporation ? 'Loading...' : corporation.displayName}
+            </option>
+          </Select>
+          <div style={{ 
+            fontSize: theme.typography.fontSize.sm,
+            color: theme.colors.neutral[600],
+            marginTop: theme.spacing[1]
+          }}>
+            Submitting content on behalf of {corporation.displayName}
+          </div>
+        </InputGroup>
       )}
 
       <Form onSubmit={handleSubmit}>

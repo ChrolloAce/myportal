@@ -168,6 +168,11 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       icon: FileText
     },
     {
+      id: 'members',
+      label: 'Members',
+      icon: Users
+    },
+    {
       id: 'statistics',
       label: 'Analytics',
       icon: BarChart3

@@ -135,6 +135,7 @@ export const CreatorDashboard: React.FC<CreatorDashboardProps> = ({
 
           <DashboardGrid>
             <VideoSubmissionForm
+              user={user}
               onSubmit={handleSubmitVideo}
               isSubmitting={isSubmitting}
             />

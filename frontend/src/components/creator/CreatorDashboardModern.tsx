@@ -5,10 +5,11 @@
 
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { Upload, History, LogOut, TrendingUp, Clock, CheckCircle, Video } from 'lucide-react';
+import { Upload, History, LogOut, TrendingUp, Clock, CheckCircle, Video, Building2 } from 'lucide-react';
 import { theme } from '../../styles/theme';
 import { VideoSubmissionForm } from './VideoSubmissionForm';
 import { SubmissionHistory } from './SubmissionHistory';
+import { AgencyInfo } from './AgencyInfo';
 import { CreatorUser, VideoSubmission, SubmissionFormData, SubmissionStatus } from '../../types';
 import { FirebaseSubmissionManager } from '../../firebase/FirebaseSubmissionManager';
 import { LoadingSpinner } from '../shared/LoadingSpinner';
@@ -18,7 +19,7 @@ interface CreatorDashboardProps {
   onLogout: () => void;
 }
 
-type CreatorView = 'overview' | 'submit' | 'history';
+type CreatorView = 'overview' | 'submit' | 'history' | 'agency';
 
 const DashboardContainer = styled.div`
   min-height: 100vh;
@@ -319,6 +320,11 @@ export const CreatorDashboard: React.FC<CreatorDashboardProps> = ({
           title: 'Your Submissions 📚',
           subtitle: 'Track the status of all your submitted content.'
         };
+      case 'agency':
+        return {
+          title: 'My Agency 🏢',
+          subtitle: 'Connect with your team and agency information.'
+        };
       default:
         return {
           title: 'Creator Dashboard',
@@ -339,6 +345,7 @@ export const CreatorDashboard: React.FC<CreatorDashboardProps> = ({
     if (currentView === 'submit') {
       return (
         <VideoSubmissionForm
+          user={user}
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
         />
@@ -359,6 +366,12 @@ export const CreatorDashboard: React.FC<CreatorDashboardProps> = ({
           submissions={submissions}
           onRefresh={loadSubmissions}
         />
+      );
+    }
+    
+    if (currentView === 'agency') {
+      return (
+        <AgencyInfo user={user} />
       );
     }
 
@@ -406,6 +419,7 @@ export const CreatorDashboard: React.FC<CreatorDashboardProps> = ({
         </StatsGrid>
         
         <VideoSubmissionForm
+          user={user}
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
         />
@@ -423,6 +437,11 @@ export const CreatorDashboard: React.FC<CreatorDashboardProps> = ({
       id: 'submit' as CreatorView,
       label: 'Submit Content',
       icon: Upload
+    },
+    {
+      id: 'agency' as CreatorView,
+      label: 'My Agency',
+      icon: Building2
     },
     {
       id: 'history' as CreatorView,
