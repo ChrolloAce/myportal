@@ -22,11 +22,52 @@ export interface CreatorUser extends BaseUser {
   isActive: boolean;
   totalSubmissions: number;
   approvedSubmissions: number;
+  
+  // Social media handles
+  socialHandles?: {
+    instagram?: string;
+    tiktok?: string;
+    twitter?: string;
+    youtube?: string;
+  };
+  
+  // Profile information
+  bio?: string;
+  specialties?: string[];
+  profilePicture?: string;
+  
+  // Corporation membership
+  corporationId?: string;
+  corporationRole?: 'creator' | 'admin';
+  joinedCorporationAt?: string;
+  
+  // Onboarding status
+  onboardingCompleted: boolean;
+  onboardingSteps: {
+    profileSetup: boolean;
+    socialHandles: boolean;
+    corporationJoin: boolean;
+  };
 }
 
 export interface AdminUser extends BaseUser {
   role: UserRole.ADMIN;
   permissions: AdminPermission[];
+  
+  // Corporation ownership/management
+  corporationId?: string;
+  corporationRole?: 'owner' | 'admin';
+  
+  // Admin profile
+  profilePicture?: string;
+  
+  // Onboarding status
+  onboardingCompleted: boolean;
+  onboardingSteps: {
+    corporationSetup: boolean;
+    profileSetup: boolean;
+    inviteSetup: boolean;
+  };
 }
 
 export enum AdminPermission {
@@ -50,3 +91,35 @@ export interface RegisterData extends LoginCredentials {
   username: string;
   role: UserRole;
 }
+
+// Onboarding data interfaces
+export interface CreatorOnboardingData {
+  // Step 1: Profile Setup
+  username: string;
+  bio?: string;
+  specialties?: string[];
+  profilePicture?: string;
+  
+  // Step 2: Social Media Handles
+  socialHandles: {
+    instagram?: string;
+    tiktok?: string;
+    twitter?: string;
+    youtube?: string;
+  };
+  
+  // Step 3: Corporation (optional)
+  inviteCode?: string;
+}
+
+export interface AdminOnboardingData {
+  // Step 1: Profile Setup
+  username: string;
+  profilePicture?: string;
+  
+  // Step 2-4: Corporation setup (will reference Corporation types)
+  corporationData?: any; // Will be typed as CorporationOnboarding from Corporation.ts
+}
+
+// Utility type for checking onboarding completion
+export type OnboardingStep = 'profileSetup' | 'socialHandles' | 'corporationJoin' | 'corporationSetup' | 'inviteSetup';

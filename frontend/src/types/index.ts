@@ -5,6 +5,7 @@
 
 export * from './User';
 export * from './Submission';
+export * from './Corporation';
 
 // API Response types
 export interface ApiResponse<T = any> {

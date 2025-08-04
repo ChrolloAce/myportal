@@ -9,12 +9,14 @@ import { ThemeProvider } from 'styled-components';
 import { theme } from './styles/theme';
 import { GlobalStyles } from './styles/GlobalStyles';
 import { FirebaseAuthManager } from './firebase/FirebaseAuthManager';
+import { FirebaseOnboardingManager } from './firebase/FirebaseOnboardingManager';
 import { LoginForm } from './components/auth/LoginForm';
 import { RegisterForm } from './components/auth/RegisterForm'; 
+import { OnboardingWizard } from './components/onboarding/OnboardingWizard';
 import { CreatorDashboard } from './components/creator/CreatorDashboardModern';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { LoadingSpinner } from './components/shared/LoadingSpinner';
-import { LoginCredentials, RegisterData, UserRole, CreatorUser, AdminUser } from './types';
+import { LoginCredentials, RegisterData, UserRole, CreatorUser, AdminUser, CreatorOnboardingData, AdminOnboardingData, CorporationOnboarding } from './types';
 
 type AppUser = CreatorUser | AdminUser;
 
@@ -23,6 +25,7 @@ interface AppState {
   isAuthenticated: boolean;
   currentUser: AppUser | null;
   showRegister: boolean;
+  needsOnboarding: boolean;
   error: string | null;
 }
 
@@ -32,10 +35,12 @@ const App: React.FC = () => {
     isAuthenticated: false,
     currentUser: null,
     showRegister: false,
+    needsOnboarding: false,
     error: null
   });
 
   const authManager = FirebaseAuthManager.getInstance();
+  const onboardingManager = FirebaseOnboardingManager.getInstance();
 
   useEffect(() => {
     // Initialize app state and wait for Firebase auth
@@ -49,10 +54,17 @@ const App: React.FC = () => {
         const isAuthenticated = authManager.isAuthenticated();
         const currentUser = authManager.getCurrentUser();
         
+        // Check if user needs onboarding
+        let needsOnboarding = false;
+        if (isAuthenticated && currentUser) {
+          needsOnboarding = await onboardingManager.needsOnboarding(currentUser);
+        }
+        
         console.log('✅ Firebase auth initialized:', { 
           isAuthenticated, 
           userRole: currentUser?.role,
-          userEmail: currentUser?.email 
+          userEmail: currentUser?.email,
+          needsOnboarding
         });
 
         setState({
@@ -60,6 +72,7 @@ const App: React.FC = () => {
           isAuthenticated,
           currentUser: currentUser as AppUser,
           showRegister: false,
+          needsOnboarding,
           error: null
         });
       } catch (error) {
@@ -69,6 +82,7 @@ const App: React.FC = () => {
           isAuthenticated: false,
           currentUser: null,
           showRegister: false,
+          needsOnboarding: false,
           error: 'Failed to initialize application'
         });
       }
@@ -83,11 +97,15 @@ const App: React.FC = () => {
     try {
       const response = await authManager.login(credentials);
       
+      // Check if user needs onboarding
+      const needsOnboarding = await onboardingManager.needsOnboarding(response.user);
+      
       setState({
         isLoading: false,
         isAuthenticated: true,
         currentUser: response.user as AppUser,
         showRegister: false,
+        needsOnboarding,
         error: null
       });
     } catch (error) {
@@ -106,11 +124,15 @@ const App: React.FC = () => {
     try {
       const response = await authManager.register(data);
       
+      // New users always need onboarding
+      const needsOnboarding = true;
+      
       setState({
         isLoading: false,
         isAuthenticated: true,
         currentUser: response.user as AppUser,
         showRegister: false,
+        needsOnboarding,
         error: null
       });
     } catch (error) {
@@ -129,11 +151,15 @@ const App: React.FC = () => {
     try {
       const response = await authManager.signInWithGoogle();
       
+      // Check if user needs onboarding (could be existing or new Google user)
+      const needsOnboarding = await onboardingManager.needsOnboarding(response.user);
+      
       setState({
         isLoading: false,
         isAuthenticated: true,
         currentUser: response.user as AppUser,
         showRegister: false,
+        needsOnboarding,
         error: null
       });
     } catch (error) {
@@ -153,6 +179,7 @@ const App: React.FC = () => {
       isAuthenticated: false,
       currentUser: null,
       showRegister: false,
+      needsOnboarding: false,
       error: null
     });
   };
@@ -165,9 +192,64 @@ const App: React.FC = () => {
     setState(prev => ({ ...prev, showRegister: false, error: null }));
   };
 
+  // Handle onboarding completion
+  const handleOnboardingComplete = async (data: CreatorOnboardingData | (AdminOnboardingData & { corporationData: CorporationOnboarding })): Promise<void> => {
+    if (!state.currentUser) return;
+    
+    setState(prev => ({ ...prev, isLoading: true, error: null }));
+    
+    try {
+      let updatedUser: AppUser;
+      
+      if (state.currentUser.role === UserRole.CREATOR) {
+        updatedUser = await onboardingManager.completeCreatorOnboarding(
+          state.currentUser.id,
+          data as CreatorOnboardingData
+        );
+      } else {
+        updatedUser = await onboardingManager.completeAdminOnboarding(
+          state.currentUser.id,
+          data as AdminOnboardingData & { corporationData: CorporationOnboarding }
+        );
+      }
+      
+      setState({
+        isLoading: false,
+        isAuthenticated: true,
+        currentUser: updatedUser,
+        showRegister: false,
+        needsOnboarding: false,
+        error: null
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Onboarding failed';
+      setState(prev => ({
+        ...prev,
+        isLoading: false,
+        error: errorMessage
+      }));
+    }
+  };
+
+  // Handle onboarding skip
+  const handleOnboardingSkip = async (): Promise<void> => {
+    if (!state.currentUser) return;
+    
+    try {
+      await onboardingManager.skipOnboarding(state.currentUser.id, state.currentUser.role);
+      setState(prev => ({
+        ...prev,
+        needsOnboarding: false
+      }));
+    } catch (error) {
+      console.error('Failed to skip onboarding:', error);
+    }
+  };
+
   // Helper function to determine redirect path
   const getDefaultRoute = (): string => {
     if (!state.isAuthenticated || !state.currentUser) return '/login';
+    if (state.needsOnboarding) return '/onboarding';
     if (state.currentUser.role === UserRole.ADMIN) return '/admin';
     return '/creator';
   };
@@ -218,15 +300,30 @@ const App: React.FC = () => {
           />
           
           <Route
+            path="/onboarding"
+            element={
+              state.isAuthenticated && state.currentUser && state.needsOnboarding ? (
+                <OnboardingWizard
+                  userRole={state.currentUser.role}
+                  onComplete={handleOnboardingComplete}
+                  onSkip={handleOnboardingSkip}
+                />
+              ) : (
+                <Navigate to={getDefaultRoute()} replace />
+              )
+            }
+          />
+          
+          <Route
             path="/creator"
             element={
-              state.isAuthenticated && state.currentUser?.role === UserRole.CREATOR ? (
+              state.isAuthenticated && state.currentUser?.role === UserRole.CREATOR && !state.needsOnboarding ? (
                 <CreatorDashboard
                   user={state.currentUser as CreatorUser}
                   onLogout={handleLogout}
                 />
               ) : (
-                <Navigate to="/login" replace />
+                <Navigate to={getDefaultRoute()} replace />
               )
             }
           />
@@ -234,13 +331,13 @@ const App: React.FC = () => {
           <Route
             path="/admin"
             element={
-              state.isAuthenticated && state.currentUser && state.currentUser.role === UserRole.ADMIN ? (
+              state.isAuthenticated && state.currentUser && state.currentUser.role === UserRole.ADMIN && !state.needsOnboarding ? (
                 <AdminDashboard
                   user={state.currentUser as AdminUser}
                   onLogout={handleLogout}
                 />
               ) : (
-                <Navigate to="/login" replace />
+                <Navigate to={getDefaultRoute()} replace />
               )
             }
           />
