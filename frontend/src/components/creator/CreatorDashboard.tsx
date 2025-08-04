@@ -11,7 +11,7 @@ import { VideoSubmissionForm } from './VideoSubmissionForm';
 import { SubmissionHistory } from './SubmissionHistory';
 import { DashboardHeader } from './DashboardHeader';
 import { CreatorUser, VideoSubmission, SubmissionFormData } from '../../types';
-import { SubmissionManager } from '../../managers/SubmissionManager';
+import { FirebaseSubmissionManager } from '../../firebase/FirebaseSubmissionManager';
 import { LoadingSpinner } from '../shared/LoadingSpinner';
 
 interface CreatorDashboardProps {
@@ -78,7 +78,7 @@ export const CreatorDashboard: React.FC<CreatorDashboardProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  const submissionManager = SubmissionManager.getInstance();
+  const submissionManager = FirebaseSubmissionManager.getInstance();
 
   useEffect(() => {
     loadSubmissions();

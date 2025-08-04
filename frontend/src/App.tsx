@@ -8,7 +8,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ThemeProvider } from 'styled-components';
 import { theme } from './styles/theme';
 import { GlobalStyles } from './styles/GlobalStyles';
-import { AuthManager } from './managers/AuthManager';
+import { FirebaseAuthManager } from './firebase/FirebaseAuthManager';
 import { LoginForm } from './components/auth/LoginForm';
 import { RegisterForm } from './components/auth/RegisterForm'; 
 import { CreatorDashboard } from './components/creator/CreatorDashboard';
@@ -34,12 +34,15 @@ const App: React.FC = () => {
     error: null
   });
 
-  const authManager = AuthManager.getInstance();
+  const authManager = FirebaseAuthManager.getInstance();
 
   useEffect(() => {
-    // Initialize app state once on mount
-    const initializeApp = () => {
+    // Initialize app state and wait for Firebase auth
+    const initializeApp = async () => {
       try {
+        // Wait for Firebase auth to initialize
+        await authManager.waitForAuthInit();
+        
         const isAuthenticated = authManager.isAuthenticated();
         const currentUser = authManager.getCurrentUser();
 
