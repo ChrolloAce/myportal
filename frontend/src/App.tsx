@@ -11,7 +11,8 @@ import { GlobalStyles } from './styles/GlobalStyles';
 import { FirebaseAuthManager } from './firebase/FirebaseAuthManager';
 import { LoginForm } from './components/auth/LoginForm';
 import { RegisterForm } from './components/auth/RegisterForm'; 
-import { CreatorDashboard } from './components/creator/CreatorDashboard';
+import { CreatorDashboard } from './components/creator/CreatorDashboardModern';
+import { AdminDashboard } from './components/admin/AdminDashboard';
 import { LoadingSpinner } from './components/shared/LoadingSpinner';
 import { LoginCredentials, RegisterData, UserRole, CreatorUser, AdminUser } from './types';
 
@@ -226,7 +227,10 @@ const App: React.FC = () => {
             path="/admin"
             element={
               state.isAuthenticated && state.currentUser && state.currentUser.role === UserRole.ADMIN ? (
-                <div>Admin Dashboard - Coming Soon</div>
+                <AdminDashboard
+                  user={state.currentUser as AdminUser}
+                  onLogout={handleLogout}
+                />
               ) : (
                 <Navigate to="/login" replace />
               )

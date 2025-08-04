@@ -23,6 +23,7 @@ export const theme = {
     // Neutral palette - clean and calming
     neutral: {
       0: '#ffffff',
+      25: '#fcfcfc',
       50: '#fafafa',
       100: '#f5f5f5',
       200: '#e5e5e5',
@@ -52,6 +53,20 @@ export const theme = {
       light: '#fecaca',
       main: '#dc2626',
       dark: '#991b1b',
+    },
+
+    // Additional color palette
+    purple: {
+      50: '#faf5ff',
+      100: '#f3e8ff',
+      200: '#e9d5ff',
+      300: '#d8b4fe',
+      400: '#c084fc',
+      500: '#a855f7',
+      600: '#9333ea',
+      700: '#7c3aed',
+      800: '#6b21a8',
+      900: '#581c87',
     },
     
     // Status colors for submissions
