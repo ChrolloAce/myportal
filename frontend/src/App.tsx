@@ -145,11 +145,11 @@ const App: React.FC = () => {
     }
   };
 
-  const handleGoogleSignIn = async (): Promise<void> => {
+  const handleGoogleSignIn = async (role: UserRole): Promise<void> => {
     setState(prev => ({ ...prev, error: null }));
     
     try {
-      const response = await authManager.signInWithGoogle();
+      const response = await authManager.signInWithGoogle(role);
       
       // Check if user needs onboarding (could be existing or new Google user)
       const needsOnboarding = await onboardingManager.needsOnboarding(response.user);
@@ -283,6 +283,7 @@ const App: React.FC = () => {
               ) : state.showRegister ? (
                 <RegisterForm
                   onRegister={handleRegister}
+                  onGoogleSignIn={handleGoogleSignIn}
                   onSwitchToLogin={switchToLogin}
                   isLoading={state.isLoading}
                   error={state.error}

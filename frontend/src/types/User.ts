@@ -85,11 +85,11 @@ export interface AuthResponse {
 export interface LoginCredentials {
   email: string;
   password: string;
+  role: UserRole;
 }
 
 export interface RegisterData extends LoginCredentials {
   username: string;
-  role: UserRole;
 }
 
 // Onboarding data interfaces

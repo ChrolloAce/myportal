@@ -8,11 +8,11 @@ import styled from 'styled-components';
 import { theme } from '../../styles/theme';
 import { Card, Button, Input } from '../../styles/GlobalStyles';
 import { LoadingSpinner } from '../shared/LoadingSpinner';
-import { LoginCredentials } from '../../types';
+import { LoginCredentials, UserRole } from '../../types';
 
 interface LoginFormProps {
   onLogin: (credentials: LoginCredentials) => Promise<void>;
-  onGoogleSignIn: () => Promise<void>;
+  onGoogleSignIn: (role: UserRole) => Promise<void>;
   onSwitchToRegister: () => void;
   isLoading: boolean;
   error: string | null;
@@ -111,6 +111,31 @@ const OrDivider = styled.div`
   }
 `;
 
+const RoleSelection = styled.div`
+  display: flex;
+  gap: ${theme.spacing[3]};
+  margin-top: ${theme.spacing[2]};
+`;
+
+const RoleOption = styled.button<{ selected: boolean }>`
+  flex: 1;
+  padding: ${theme.spacing[3]} ${theme.spacing[4]};
+  border: 2px solid ${({ selected }) => 
+    selected ? theme.colors.primary[500] : theme.colors.neutral[300]};
+  border-radius: ${theme.borderRadius.md};
+  background: ${({ selected }) => 
+    selected ? theme.colors.primary[50] : theme.colors.neutral[0]};
+  color: ${({ selected }) => 
+    selected ? theme.colors.primary[700] : theme.colors.neutral[600]};
+  font-weight: ${theme.typography.fontWeight.medium};
+  transition: all ${theme.transitions.fast};
+  
+  &:hover {
+    border-color: ${theme.colors.primary[400]};
+    background: ${theme.colors.primary[25]};
+  }
+`;
+
 const SwitchAuthLink = styled.button`
   color: ${theme.colors.primary[600]};
   font-weight: ${theme.typography.fontWeight.medium};
@@ -131,7 +156,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 }) => {
   const [formData, setFormData] = useState<LoginCredentials>({
     email: '',
-    password: ''
+    password: '',
+    role: UserRole.CREATOR
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -149,8 +175,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       }));
     };
 
+  const handleRoleSelect = (role: UserRole) => {
+    setFormData(prev => ({ ...prev, role }));
+  };
+
   const handleGoogleSignIn = async () => {
-    await onGoogleSignIn();
+    await onGoogleSignIn(formData.role);
   };
 
   return (
@@ -186,6 +216,28 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               disabled={isLoading}
               required
             />
+          </InputGroup>
+
+          <InputGroup>
+            <Label>Account Type</Label>
+            <RoleSelection>
+              <RoleOption
+                type="button"
+                selected={formData.role === UserRole.CREATOR}
+                onClick={() => handleRoleSelect(UserRole.CREATOR)}
+                disabled={isLoading}
+              >
+                Creator
+              </RoleOption>
+              <RoleOption
+                type="button"
+                selected={formData.role === UserRole.ADMIN}
+                onClick={() => handleRoleSelect(UserRole.ADMIN)}
+                disabled={isLoading}
+              >
+                Admin
+              </RoleOption>
+            </RoleSelection>
           </InputGroup>
 
           <Button 
