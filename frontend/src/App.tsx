@@ -13,12 +13,14 @@ import { LoginForm } from './components/auth/LoginForm';
 import { RegisterForm } from './components/auth/RegisterForm'; 
 import { CreatorDashboard } from './components/creator/CreatorDashboard';
 import { LoadingSpinner } from './components/shared/LoadingSpinner';
-import { LoginCredentials, RegisterData, UserRole, CreatorUser } from './types';
+import { LoginCredentials, RegisterData, UserRole, CreatorUser, AdminUser } from './types';
+
+type AppUser = CreatorUser | AdminUser;
 
 interface AppState {
   isLoading: boolean;
   isAuthenticated: boolean;
-  currentUser: CreatorUser | null;
+  currentUser: AppUser | null;
   showRegister: boolean;
   error: string | null;
 }
@@ -44,7 +46,7 @@ const App: React.FC = () => {
         setState({
           isLoading: false,
           isAuthenticated,
-          currentUser: currentUser as CreatorUser,
+          currentUser: currentUser as AppUser,
           showRegister: false,
           error: null
         });
@@ -72,7 +74,7 @@ const App: React.FC = () => {
       setState({
         isLoading: false,
         isAuthenticated: true,
-        currentUser: response.user as CreatorUser,
+        currentUser: response.user as AppUser,
         showRegister: false,
         error: null
       });
@@ -95,7 +97,7 @@ const App: React.FC = () => {
       setState({
         isLoading: false,
         isAuthenticated: true,
-        currentUser: response.user as CreatorUser,
+        currentUser: response.user as AppUser,
         showRegister: false,
         error: null
       });
@@ -130,8 +132,8 @@ const App: React.FC = () => {
 
   // Helper function to determine redirect path
   const getDefaultRoute = (): string => {
-    if (!state.isAuthenticated) return '/login';
-    if (state.currentUser?.role === UserRole.ADMIN) return '/admin';
+    if (!state.isAuthenticated || !state.currentUser) return '/login';
+    if (state.currentUser.role === UserRole.ADMIN) return '/admin';
     return '/creator';
   };
 
@@ -184,7 +186,7 @@ const App: React.FC = () => {
             element={
               state.isAuthenticated && state.currentUser?.role === UserRole.CREATOR ? (
                 <CreatorDashboard
-                  user={state.currentUser}
+                  user={state.currentUser as CreatorUser}
                   onLogout={handleLogout}
                 />
               ) : (
@@ -196,7 +198,7 @@ const App: React.FC = () => {
           <Route
             path="/admin"
             element={
-              state.isAuthenticated && state.currentUser?.role === UserRole.ADMIN ? (
+              state.isAuthenticated && state.currentUser && state.currentUser.role === UserRole.ADMIN ? (
                 <div>Admin Dashboard - Coming Soon</div>
               ) : (
                 <Navigate to="/login" replace />

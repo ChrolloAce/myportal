@@ -165,7 +165,7 @@ export class AppCoordinator {
         this.updateState({
           isAuthenticated,
           currentUser,
-          currentRoute: isAuthenticated ? this.determineDefaultRoute(currentUser) : AppRoute.LOGIN
+          currentRoute: isAuthenticated && currentUser ? this.determineDefaultRoute(currentUser) : AppRoute.LOGIN
         });
       }
     });
