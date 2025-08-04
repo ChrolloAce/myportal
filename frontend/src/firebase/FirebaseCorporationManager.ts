@@ -100,17 +100,44 @@ export class FirebaseCorporationManager {
   // Get corporation members
   async getCorporationMembers(corporationId: string): Promise<CorporationMember[]> {
     try {
-      const membersQuery = query(
+      // Try compound query first (requires index)
+      let membersQuery = query(
         collection(db, 'corporationMembers'),
         where('corporationId', '==', corporationId),
         orderBy('joinedAt', 'desc')
       );
       
-      const snapshot = await getDocs(membersQuery);
-      return snapshot.docs.map(doc => ({ ...doc.data() } as CorporationMember));
+      let snapshot = await getDocs(membersQuery);
+      const members = snapshot.docs.map(doc => ({ 
+        id: doc.id, 
+        ...doc.data() 
+      } as CorporationMember));
+      
+      return members;
     } catch (error) {
-      console.error('Error getting corporation members:', error);
-      return [];
+      console.warn('Compound query failed, falling back to simple query:', error);
+      
+      // Fallback to simple query without orderBy
+      try {
+        const simpleQuery = query(
+          collection(db, 'corporationMembers'),
+          where('corporationId', '==', corporationId)
+        );
+        
+        const snapshot = await getDocs(simpleQuery);
+        const members = snapshot.docs.map(doc => ({ 
+          id: doc.id, 
+          ...doc.data() 
+        } as CorporationMember));
+        
+        // Sort in JavaScript instead
+        return members.sort((a, b) => 
+          new Date(b.joinedAt).getTime() - new Date(a.joinedAt).getTime()
+        );
+      } catch (fallbackError) {
+        console.error('Error getting corporation members:', fallbackError);
+        return [];
+      }
     }
   }
 
@@ -165,8 +192,8 @@ export class FirebaseCorporationManager {
         currentUses: 0,
         role: options.role,
         isActive: true,
-        email: options.email,
-        note: options.note
+        ...(options.email && { email: options.email }),
+        ...(options.note && { note: options.note })
       };
 
       const inviteRef = await addDoc(collection(db, 'corporationInvites'), inviteData);
