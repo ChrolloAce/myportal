@@ -195,8 +195,8 @@ const JoinButton = styled.button<{ variant?: 'primary' | 'pending' }>`
   margin-top: 1rem;
   
   ${props => props.variant === 'pending' ? `
-    background: ${theme.colors.warning[100]};
-    color: ${theme.colors.warning[700]};
+    background: ${theme.colors.warning.light};
+    color: ${theme.colors.warning.dark};
     cursor: not-allowed;
   ` : `
     background: ${theme.colors.primary[500]};
