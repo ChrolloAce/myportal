@@ -6,8 +6,8 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { 
-  UserPlus, Copy, Link2, Users, Calendar, Hash, 
-  CheckCircle, XCircle, Plus, Edit, Trash2 
+  UserPlus, Copy, Link2, Users, Hash, 
+  CheckCircle, XCircle, Plus
 } from 'lucide-react';
 import { theme } from '../../styles/theme';
 import { FirebaseCorporationManager } from '../../firebase/FirebaseCorporationManager';
@@ -337,7 +337,7 @@ export const InviteManagement: React.FC<InviteManagementProps> = ({ user }) => {
         </StatCard>
 
         <StatCard>
-          <StatIcon color={theme.colors.success[500]}>
+          <StatIcon color={theme.colors.success.main}>
             <CheckCircle />
           </StatIcon>
           <StatValue>{activeInvites.length}</StatValue>
@@ -345,7 +345,7 @@ export const InviteManagement: React.FC<InviteManagementProps> = ({ user }) => {
         </StatCard>
 
         <StatCard>
-          <StatIcon color={theme.colors.warning[500]}>
+          <StatIcon color={theme.colors.warning.main}>
             <Users />
           </StatIcon>
           <StatValue>{totalUses}</StatValue>

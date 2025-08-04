@@ -7,8 +7,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { 
   Building2, Users, Globe, Instagram, MessageSquare, 
-  Twitter, ArrowLeft, Check, Clock, User,
-  ChevronRight, Search
+  Twitter, ArrowLeft, Check, Clock, User, Search
 } from 'lucide-react';
 import { theme } from '../../styles/theme';
 import { FirebaseCorporationManager } from '../../firebase/FirebaseCorporationManager';
@@ -226,8 +225,8 @@ const RequiresApproval = styled.div`
   align-items: center;
   gap: 0.5rem;
   font-size: 0.8rem;
-  color: ${theme.colors.warning[700]};
-  background: ${theme.colors.warning[50]};
+  color: ${theme.colors.warning.dark};
+  background: ${theme.colors.warning.light};
   padding: 0.5rem;
   border-radius: 6px;
   margin-top: 0.5rem;
@@ -256,7 +255,7 @@ export const CorporationBrowser: React.FC<CorporationBrowserProps> = ({
     } else {
       const filtered = corporations.filter(corp => 
         corp.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        corp.industry.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (corp.industry && corp.industry.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (corp.description && corp.description.toLowerCase().includes(searchTerm.toLowerCase()))
       );
       setFilteredCorporations(filtered);
@@ -343,7 +342,7 @@ export const CorporationBrowser: React.FC<CorporationBrowserProps> = ({
                 </CorporationLogo>
                 <CorporationInfo>
                   <CorporationName>{corp.displayName}</CorporationName>
-                  <CorporationIndustry>{corp.industry}</CorporationIndustry>
+                  <CorporationIndustry>{corp.industry || 'General'}</CorporationIndustry>
                 </CorporationInfo>
               </CorporationHeader>
 
