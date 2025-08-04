@@ -4,6 +4,15 @@
   "framework": null,
   "routes": [
     {
+      "src": "/assets/(.*)",
+      "headers": {
+        "cache-control": "max-age=31536000"
+      }
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
       "src": "/(.*)",
       "dest": "/index.html"
     }
