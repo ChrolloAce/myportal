@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { FirebaseCorporationManager } from '../../firebase/FirebaseCorporationManager';
 import { FirebaseAuthManager } from '../../firebase/FirebaseAuthManager';
-import { Corporation, CorporationInvite, LoginCredentials, RegisterData, UserRole } from '../../types';
+import { Corporation, CorporationInvite, LoginCredentials, RegisterData } from '../../types';
 import { LoginForm } from '../auth/LoginForm';
 import { RegisterForm } from '../auth/RegisterForm';
 
