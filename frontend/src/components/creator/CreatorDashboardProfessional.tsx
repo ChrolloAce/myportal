@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { professionalTheme } from '../../styles/professionalTheme';
-import { Container, Card, Button, Badge } from '../../styles/ProfessionalStyles';
+import { Card, Button, Badge } from '../../styles/ProfessionalStyles';
 import { CreatorUser, VideoSubmission } from '../../types';
 import { FirebaseSubmissionManager } from '../../firebase/FirebaseSubmissionManager';
 import { 
@@ -18,7 +18,6 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
-  User,
   Building2,
   LogOut,
   Plus,
@@ -312,7 +311,7 @@ export const CreatorDashboard: React.FC<CreatorDashboardProps> = ({ user, onLogo
     const loadSubmissions = async () => {
       try {
         setLoading(true);
-        const userSubmissions = await submissionManager.getUserSubmissions(user.id);
+        const userSubmissions = await submissionManager.getSubmissions();
         setSubmissions(userSubmissions);
       } catch (error) {
         console.error('Failed to load submissions:', error);
@@ -346,8 +345,8 @@ export const CreatorDashboard: React.FC<CreatorDashboardProps> = ({ user, onLogo
     }
   };
 
-  const getUserInitials = (name: string): string => {
-    return name
+  const getUserInitials = (username: string): string => {
+    return username
       .split(' ')
       .map(word => word.charAt(0))
       .join('')
@@ -375,7 +374,7 @@ export const CreatorDashboard: React.FC<CreatorDashboardProps> = ({ user, onLogo
             </Logo>
             
             <WelcomeSection>
-              <WelcomeTitle>Welcome back, {user.name.split(' ')[0]}!</WelcomeTitle>
+              <WelcomeTitle>Welcome back, {user.username.split(' ')[0]}!</WelcomeTitle>
               <WelcomeSubtitle>Ready to create something amazing today?</WelcomeSubtitle>
             </WelcomeSection>
           </HeaderLeft>
@@ -388,10 +387,10 @@ export const CreatorDashboard: React.FC<CreatorDashboardProps> = ({ user, onLogo
             
             <UserMenu>
               <UserAvatar>
-                {getUserInitials(user.name)}
+                {getUserInitials(user.username)}
               </UserAvatar>
               <UserInfo>
-                <UserName>{user.name}</UserName>
+                <UserName>{user.username}</UserName>
               </UserInfo>
               <Button variant="ghost" size="sm" onClick={onLogout}>
                 <LogOut size={16} />
@@ -454,11 +453,11 @@ export const CreatorDashboard: React.FC<CreatorDashboardProps> = ({ user, onLogo
                     <SubmissionCard key={submission.id} status={submission.status}>
                       <SubmissionHeader>
                         <div>
-                          <SubmissionTitle>{submission.title}</SubmissionTitle>
+                          <SubmissionTitle>{submission.caption || `${submission.platform} Submission`}</SubmissionTitle>
                           <SubmissionMeta>
                             <span>
                               <Calendar size={14} />
-                              {new Date(submission.createdAt).toLocaleDateString()}
+                              {new Date(submission.submittedAt).toLocaleDateString()}
                             </span>
                             <Badge variant={getStatusVariant(submission.status)} size="sm">
                               {getStatusIcon(submission.status)}

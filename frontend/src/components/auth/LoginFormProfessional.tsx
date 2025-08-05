@@ -64,7 +64,7 @@ const LoginSubtitle = styled.p`
   line-height: ${professionalTheme.typography.lineHeight.relaxed};
 `;
 
-const LoginForm = styled.form`
+const LoginFormContainer = styled.form`
   display: flex;
   flex-direction: column;
   gap: ${professionalTheme.spacing[5]};
@@ -229,7 +229,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     if (!credentials.email || !credentials.password) return;
     
     try {
-      await onLogin(credentials);
+      await onLogin({
+        ...credentials,
+        role: UserRole.CREATOR // Default role, will be determined by backend
+      });
     } catch (error) {
       // Error handled by parent component
     }
@@ -258,7 +261,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
         {error && <ErrorMessage>{error}</ErrorMessage>}
 
-        <LoginForm onSubmit={handleSubmit}>
+        <LoginFormContainer onSubmit={handleSubmit}>
           <FormGroup>
             <FormLabel htmlFor="email">Email address</FormLabel>
             <InputWrapper>
@@ -316,7 +319,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           >
             {isLoading ? 'Signing in...' : 'Sign in'}
           </LoginButton>
-        </LoginForm>
+        </LoginFormContainer>
 
         <Divider>
           <span>or</span>

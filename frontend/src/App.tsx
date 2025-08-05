@@ -334,7 +334,7 @@ const App: React.FC = () => {
                 <OnboardingWizard
                   userRole={state.currentUser.role}
                   onComplete={handleOnboardingComplete}
-                  onSkip={handleOnboardingSkip}
+                  onCancel={handleOnboardingSkip}
                 />
               ) : (
                 <Navigate to={getDefaultRoute()} replace />

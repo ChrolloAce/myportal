@@ -256,8 +256,8 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
     }
   ];
 
-  const getUserInitials = (name: string): string => {
-    return name
+  const getUserInitials = (username: string): string => {
+    return username
       .split(' ')
       .map(word => word.charAt(0))
       .join('')
@@ -277,10 +277,10 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
         <UserInfo>
           <UserAvatar>
-            {getUserInitials(user.name)}
+            {getUserInitials(user.username)}
           </UserAvatar>
           <UserDetails>
-            <UserName title={user.name}>{user.name}</UserName>
+            <UserName title={user.username}>{user.username}</UserName>
             <UserRole>
               <Crown size={12} />
               <Badge variant="info" size="sm">Admin</Badge>

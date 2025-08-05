@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { professionalTheme } from '../../styles/professionalTheme';
-import { Container, Card } from '../../styles/ProfessionalStyles';
+import { Card } from '../../styles/ProfessionalStyles';
 import { FirebaseSubmissionManager } from '../../firebase/FirebaseSubmissionManager';
 import { AdminUser, VideoSubmission, SubmissionStats } from '../../types';
 import { AdminSidebar } from './AdminSidebar';
@@ -152,8 +152,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
         
         if (user.corporationId) {
           const [submissionsData, statsData] = await Promise.all([
-            submissionManager.getCorporationSubmissions(user.corporationId),
-            submissionManager.getSubmissionStats(user.corporationId)
+            submissionManager.getSubmissions(),
+            submissionManager.getSubmissionStats()
           ]);
           
           setSubmissions(submissionsData);
@@ -219,23 +219,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
       case 'overview':
         return (
           <AdminOverview 
-            user={user} 
-            submissions={submissions}
             stats={stats}
-            loading={loading}
+            recentSubmissions={submissions.slice(0, 5)}
+            onViewAllSubmissions={() => setCurrentView('submissions')}
           />
         );
       case 'submissions':
         return (
           <SubmissionManagement 
-            user={user}
             submissions={submissions}
             onSubmissionUpdate={() => {
               // Reload submissions when updated
-              if (user.corporationId) {
-                submissionManager.getCorporationSubmissions(user.corporationId)
-                  .then(setSubmissions);
-              }
+              submissionManager.getSubmissions()
+                .then(setSubmissions);
             }}
           />
         );
@@ -245,11 +241,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
         return <UserManagement user={user} />;
       case 'members':
         return user.corporationId ? (
-          <CorporationMembers corporationId={user.corporationId} />
+          <CorporationMembers user={user} corporationId={user.corporationId} />
         ) : null;
       case 'invites':
         return user.corporationId ? (
-          <InviteManagement corporationId={user.corporationId} />
+          <InviteManagement user={user} />
         ) : null;
       case 'settings':
         return (

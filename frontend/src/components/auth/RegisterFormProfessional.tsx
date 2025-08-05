@@ -120,7 +120,7 @@ const RoleDescription = styled.p`
   line-height: ${professionalTheme.typography.lineHeight.relaxed};
 `;
 
-const RegisterForm = styled.form`
+const RegisterFormContainer = styled.form`
   display: flex;
   flex-direction: column;
   gap: ${professionalTheme.spacing[4]};
@@ -275,7 +275,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   error
 }) => {
   const [formData, setFormData] = useState<RegisterData>({
-    name: '',
+    username: '',
     email: '',
     password: '',
     role: UserRole.CREATOR
@@ -284,7 +284,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.email || !formData.password) return;
+    if (!formData.username || !formData.email || !formData.password) return;
     
     try {
       await onRegister(formData);
@@ -350,7 +350,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           </RoleCard>
         </RoleSelection>
 
-        <RegisterForm onSubmit={handleSubmit}>
+        <RegisterFormContainer onSubmit={handleSubmit}>
           <FormGroup>
             <FormLabel htmlFor="name">Full name</FormLabel>
             <InputWrapper>
@@ -358,8 +358,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
                 id="name"
                 type="text"
                 placeholder="Enter your full name"
-                value={formData.name}
-                onChange={(e) => updateFormData('name', e.target.value)}
+                value={formData.username}
+                onChange={(e) => updateFormData('username', e.target.value)}
                 disabled={isLoading}
                 required
               />
@@ -415,12 +415,12 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           <RegisterButton
             type="submit"
             variant="primary"
-            disabled={isLoading || !formData.name || !formData.email || !formData.password}
+            disabled={isLoading || !formData.username || !formData.email || !formData.password}
             loading={isLoading}
           >
             {isLoading ? 'Creating account...' : 'Create account'}
           </RegisterButton>
-        </RegisterForm>
+        </RegisterFormContainer>
 
         <Divider>
           <span>or</span>

@@ -11,12 +11,8 @@ import {
   ArrowLeft, 
   ArrowRight, 
   Check, 
-  User, 
   Building2, 
-  Camera,
-  Globe,
-  Users,
-  Zap
+  Camera
 } from 'lucide-react';
 import { CreatorOnboardingData, AdminOnboardingData, CorporationOnboarding, UserRole } from '../../types';
 
@@ -190,56 +186,7 @@ const NextButton = styled(Button)`
   flex: 1;
 `;
 
-const RoleSelection = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: ${professionalTheme.spacing[4]};
-  margin-bottom: ${professionalTheme.spacing[6]};
-`;
 
-const RoleCard = styled.button<{ isSelected: boolean }>`
-  padding: ${professionalTheme.spacing[6]};
-  border: 2px solid ${props => props.isSelected 
-    ? professionalTheme.colors.primary[500] 
-    : professionalTheme.borders.color.default};
-  border-radius: ${professionalTheme.borderRadius.lg};
-  background: ${props => props.isSelected 
-    ? professionalTheme.colors.primary[50] 
-    : professionalTheme.colors.white};
-  cursor: pointer;
-  transition: ${professionalTheme.transitions.all};
-  text-align: center;
-  
-  &:hover {
-    border-color: ${professionalTheme.colors.primary[400]};
-    background: ${professionalTheme.colors.primary[25]};
-  }
-`;
-
-const RoleIcon = styled.div<{ color: string }>`
-  width: 48px;
-  height: 48px;
-  margin: 0 auto ${professionalTheme.spacing[4]};
-  background: ${props => props.color}20;
-  color: ${props => props.color};
-  border-radius: ${professionalTheme.borderRadius.lg};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const RoleTitle = styled.h3`
-  font-size: ${professionalTheme.typography.fontSize.lg};
-  font-weight: ${professionalTheme.typography.fontWeight.semibold};
-  color: ${professionalTheme.colors.gray[900]};
-  margin-bottom: ${professionalTheme.spacing[2]};
-`;
-
-const RoleDescription = styled.p`
-  font-size: ${professionalTheme.typography.fontSize.sm};
-  color: ${professionalTheme.colors.gray[600]};
-  line-height: ${professionalTheme.typography.lineHeight.relaxed};
-`;
 
 export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({
   userRole,
@@ -396,7 +343,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({
                 placeholder="Describe what your organization does..."
                 value={formData.corporationData?.description || ''}
                 onChange={(e) => updateFormData('corporationData', {
-                  ...formData.corporationdata,
+                  ...formData.corporationData,
                   description: e.target.value
                 })}
               />
