@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { FirebaseCorporationManager } from '../../firebase/FirebaseCorporationManager';
 import { FirebaseAuthManager } from '../../firebase/FirebaseAuthManager';
-import { Corporation, CorporationInvite, LoginCredentials, RegisterData } from '../../types';
+import { Corporation, CorporationInvite, LoginCredentials, RegisterData, UserRole } from '../../types';
 import { LoginForm } from '../auth/LoginForm';
 import { RegisterForm } from '../auth/RegisterForm';
 
@@ -323,7 +323,7 @@ export const InviteLanding: React.FC<InviteLandingProps> = ({
   const handleLogin = async (credentials: LoginCredentials) => {
     try {
       setError(null);
-      await authManager.signIn(credentials);
+      await authManager.login(credentials);
       setAuthMode('none');
       
       // Auto-join after successful login
@@ -352,7 +352,7 @@ export const InviteLanding: React.FC<InviteLandingProps> = ({
     }
   };
 
-  const handleGoogleSignIn = async () => {
+  const handleGoogleSignIn = async (role: UserRole = UserRole.CREATOR) => {
     try {
       setError(null);
       await authManager.signInWithGoogle();
@@ -438,14 +438,15 @@ export const InviteLanding: React.FC<InviteLandingProps> = ({
           </InviteHeader>
 
           <LoginForm
-            onSubmit={handleLogin}
+            onLogin={handleLogin}
             onGoogleSignIn={handleGoogleSignIn}
+            onSwitchToRegister={() => setAuthMode('register')}
             isLoading={false}
             error={error}
           />
 
           <div style={{ marginTop: '1rem', textAlign: 'center' }}>
-            <p style={{ color: theme.colors.gray[600], fontSize: '0.9rem' }}>
+            <p style={{ color: theme.colors.neutral[600], fontSize: '0.9rem' }}>
               Don't have an account?{' '}
               <button
                 onClick={() => setAuthMode('register')}
@@ -481,14 +482,15 @@ export const InviteLanding: React.FC<InviteLandingProps> = ({
           </InviteHeader>
 
           <RegisterForm
-            onSubmit={handleRegister}
+            onRegister={handleRegister}
             onGoogleSignIn={handleGoogleSignIn}
+            onSwitchToLogin={() => setAuthMode('login')}
             isLoading={false}
             error={error}
           />
 
           <div style={{ marginTop: '1rem', textAlign: 'center' }}>
-            <p style={{ color: theme.colors.gray[600], fontSize: '0.9rem' }}>
+            <p style={{ color: theme.colors.neutral[600], fontSize: '0.9rem' }}>
               Already have an account?{' '}
               <button
                 onClick={() => setAuthMode('login')}
