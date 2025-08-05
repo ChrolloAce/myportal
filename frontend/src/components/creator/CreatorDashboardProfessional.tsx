@@ -7,8 +7,9 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { professionalTheme } from '../../styles/professionalTheme';
 import { Card, Button, Badge } from '../../styles/ProfessionalStyles';
-import { CreatorUser, VideoSubmission } from '../../types';
+import { CreatorUser, VideoSubmission, SubmissionFormData } from '../../types';
 import { FirebaseSubmissionManager } from '../../firebase/FirebaseSubmissionManager';
+import { VideoSubmissionForm } from './VideoSubmissionForm';
 import { 
   Upload, 
   Video, 
@@ -301,9 +302,71 @@ const AgencyDescription = styled.p`
   line-height: ${professionalTheme.typography.lineHeight.relaxed};
 `;
 
+const SubmissionFormModal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: ${professionalTheme.spacing[4]};
+`;
+
+const SubmissionFormOverlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+`;
+
+const SubmissionFormContent = styled.div`
+  position: relative;
+  background: ${professionalTheme.colors.white};
+  border-radius: ${professionalTheme.borderRadius.xl};
+  box-shadow: ${professionalTheme.shadows.xl};
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+`;
+
+const SubmissionFormHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: ${professionalTheme.spacing[6]};
+  border-bottom: 1px solid ${professionalTheme.colors.gray[200]};
+  
+  h2 {
+    font-size: ${professionalTheme.typography.fontSize.xl};
+    font-weight: ${professionalTheme.typography.fontWeight.semibold};
+    color: ${professionalTheme.colors.gray[900]};
+    margin: 0;
+  }
+`;
+
+const ErrorMessage = styled.div`
+  background: ${professionalTheme.colors.error[50]};
+  border: 1px solid ${professionalTheme.colors.error[200]};
+  color: ${professionalTheme.colors.error[700]};
+  padding: ${professionalTheme.spacing[3]};
+  margin: ${professionalTheme.spacing[4]} ${professionalTheme.spacing[6]};
+  border-radius: ${professionalTheme.borderRadius.md};
+  font-size: ${professionalTheme.typography.fontSize.sm};
+`;
+
 export const CreatorDashboard: React.FC<CreatorDashboardProps> = ({ user, onLogout }) => {
   const [submissions, setSubmissions] = useState<VideoSubmission[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showSubmissionForm, setShowSubmissionForm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const submissionManager = FirebaseSubmissionManager.getInstance();
 
@@ -311,7 +374,7 @@ export const CreatorDashboard: React.FC<CreatorDashboardProps> = ({ user, onLogo
     const loadSubmissions = async () => {
       try {
         setLoading(true);
-        const submissionsResponse = await submissionManager.getSubmissions();
+        const submissionsResponse = await submissionManager.getCreatorSubmissions();
         setSubmissions(submissionsResponse.items);
       } catch (error) {
         console.error('Failed to load submissions:', error);
@@ -352,6 +415,28 @@ export const CreatorDashboard: React.FC<CreatorDashboardProps> = ({ user, onLogo
       .join('')
       .toUpperCase()
       .slice(0, 2);
+  };
+
+  const handleSubmitVideo = async (formData: SubmissionFormData): Promise<boolean> => {
+    try {
+      setIsSubmitting(true);
+      setError(null);
+      
+      await submissionManager.submitVideo(formData);
+      
+      // Reload submissions to show the new one
+      const submissionsResponse = await submissionManager.getCreatorSubmissions();
+      setSubmissions(submissionsResponse.items);
+      
+      setShowSubmissionForm(false);
+      return true;
+    } catch (error) {
+      console.error('Submission failed:', error);
+      setError(error instanceof Error ? error.message : 'Submission failed');
+      return false;
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const stats = {
@@ -479,7 +564,7 @@ export const CreatorDashboard: React.FC<CreatorDashboardProps> = ({ user, onLogo
           <SideColumn>
             <QuickActionsCard>
               <SectionTitle>Quick Actions</SectionTitle>
-              <ActionButton variant="primary">
+              <ActionButton variant="primary" onClick={() => setShowSubmissionForm(true)}>
                 <Upload size={16} />
                 Upload Video
               </ActionButton>
@@ -507,6 +592,28 @@ export const CreatorDashboard: React.FC<CreatorDashboardProps> = ({ user, onLogo
           </SideColumn>
         </ContentGrid>
       </MainContent>
+
+      {showSubmissionForm && (
+        <SubmissionFormModal>
+          <SubmissionFormOverlay onClick={() => setShowSubmissionForm(false)} />
+          <SubmissionFormContent>
+            <SubmissionFormHeader>
+              <h2>Submit New Video</h2>
+              <Button variant="ghost" onClick={() => setShowSubmissionForm(false)}>
+                ×
+              </Button>
+            </SubmissionFormHeader>
+            {error && (
+              <ErrorMessage>{error}</ErrorMessage>
+            )}
+            <VideoSubmissionForm
+              user={user}
+              onSubmit={handleSubmitVideo}
+              isSubmitting={isSubmitting}
+            />
+          </SubmissionFormContent>
+        </SubmissionFormModal>
+      )}
     </DashboardLayout>
   );
 };

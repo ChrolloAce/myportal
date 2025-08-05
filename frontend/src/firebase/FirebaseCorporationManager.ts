@@ -502,6 +502,15 @@ export class FirebaseCorporationManager {
         });
       }
 
+      // Update user's profile to include corporation info
+      const userDocRef = doc(db, 'users', userId);
+      batch.update(userDocRef, {
+        corporationId: invite.corporationId,
+        corporationRole: 'creator',
+        joinedCorporationAt: new Date().toISOString(),
+        updatedAt: serverTimestamp()
+      });
+
       await batch.commit();
     } catch (error) {
       console.error('Error joining corporation with invite:', error);
