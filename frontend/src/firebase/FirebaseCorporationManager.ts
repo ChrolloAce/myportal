@@ -415,21 +415,29 @@ export class FirebaseCorporationManager {
   // Get invite by code
   async getInviteByCode(inviteCode: string): Promise<CorporationInvite | null> {
     try {
+      console.log('🔍 FirebaseCorporationManager: Searching for invite code:', inviteCode);
+      
       const invitesRef = collection(db, 'corporationInvites');
       const q = query(invitesRef, where('inviteCode', '==', inviteCode));
       const querySnapshot = await getDocs(q);
       
+      console.log('🔍 FirebaseCorporationManager: Query completed, docs found:', querySnapshot.docs.length);
+      
       if (querySnapshot.empty) {
+        console.log('🔍 FirebaseCorporationManager: No documents found for code:', inviteCode);
         return null;
       }
       
       const doc = querySnapshot.docs[0];
-      return {
+      const inviteData = {
         id: doc.id,
         ...doc.data()
       } as CorporationInvite;
+      
+      console.log('🔍 FirebaseCorporationManager: Found invite:', inviteData.id);
+      return inviteData;
     } catch (error) {
-      console.error('Error getting invite by code:', error);
+      console.error('❌ Error getting invite by code:', error);
       throw error;
     }
   }

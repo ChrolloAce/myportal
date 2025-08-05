@@ -245,8 +245,15 @@ export const InviteLanding: React.FC<InviteLandingProps> = ({
       setIsLoading(true);
       setError(null);
 
+      // Debug logging for mobile issues
+      console.log('🔍 Loading invite with code:', inviteCode);
+      console.log('🔍 Invite code length:', inviteCode?.length);
+      console.log('🔍 Invite code type:', typeof inviteCode);
+
       // Get invite information
       const inviteData = await corporationManager.getInviteByCode(inviteCode);
+      console.log('🔍 Invite data received:', inviteData ? 'Found' : 'Not found');
+      
       if (!inviteData) {
         throw new Error('Invite not found or expired');
       }

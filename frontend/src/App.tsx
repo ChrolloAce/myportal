@@ -24,14 +24,24 @@ type AppUser = CreatorUser | AdminUser;
 // Wrapper component for invite route to properly extract params
 const InviteRoute: React.FC<{ onJoinSuccess: () => void }> = ({ onJoinSuccess }) => {
   const { inviteCode } = useParams<{ inviteCode: string }>();
-  
+
+  // Debug logging for mobile issues
+  console.log('🔍 InviteRoute: Raw inviteCode from params:', inviteCode);
+  console.log('🔍 InviteRoute: inviteCode length:', inviteCode?.length);
+  console.log('🔍 InviteRoute: Current URL:', window.location.href);
+
   if (!inviteCode) {
+    console.log('❌ InviteRoute: No invite code found, redirecting to login');
     return <Navigate to="/login" replace />;
   }
-  
+
+  // Trim whitespace and decode URI component (mobile browsers might encode differently)
+  const cleanInviteCode = decodeURIComponent(inviteCode.trim());
+  console.log('🔍 InviteRoute: Cleaned inviteCode:', cleanInviteCode);
+
   return (
     <InviteLanding
-      inviteCode={inviteCode}
+      inviteCode={cleanInviteCode}
       onJoinSuccess={onJoinSuccess}
     />
   );
@@ -336,9 +346,22 @@ const App: React.FC = () => {
             path="/invite/:inviteCode"
             element={
               <InviteRoute
-                onJoinSuccess={() => {
-                  // Force app to re-check authentication and routing
-                  window.location.reload();
+                onJoinSuccess={async () => {
+                  // Refresh user profile to get updated corporation info
+                  const updatedUser = await authManager.refreshUserProfile();
+                  if (updatedUser) {
+                    setState(prev => ({
+                      ...prev,
+                      currentUser: updatedUser as AppUser
+                    }));
+                    
+                    // Navigate to appropriate dashboard based on user role
+                    const targetRoute = updatedUser.role === UserRole.ADMIN ? '/admin' : '/creator';
+                    window.location.href = targetRoute;
+                  } else {
+                    // Fallback to reload if profile refresh fails
+                    window.location.reload();
+                  }
                 }}
               />
             }
