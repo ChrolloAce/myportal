@@ -6,8 +6,8 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
-import { theme } from './styles/theme';
-import { GlobalStyles } from './styles/GlobalStyles';
+import { professionalTheme } from './styles/professionalTheme';
+import { ProfessionalGlobalStyles } from './styles/ProfessionalStyles';
 import { FirebaseAuthManager } from './firebase/FirebaseAuthManager';
 import { FirebaseOnboardingManager } from './firebase/FirebaseOnboardingManager';
 import { LoginForm } from './components/auth/LoginForm';
@@ -283,8 +283,8 @@ const App: React.FC = () => {
 
   if (state.isLoading) {
     return (
-      <ThemeProvider theme={theme}>
-        <GlobalStyles />
+              <ThemeProvider theme={professionalTheme}>
+                  <ProfessionalGlobalStyles />
         <div style={{ 
           height: '100vh', 
           display: 'flex', 
@@ -298,8 +298,8 @@ const App: React.FC = () => {
   }
 
   return (
-    <ThemeProvider theme={theme}>
-      <GlobalStyles />
+            <ThemeProvider theme={professionalTheme}>
+                <ProfessionalGlobalStyles />
       <Router key={state.isAuthenticated ? 'authenticated' : 'unauthenticated'}>
         <Routes>
           <Route
