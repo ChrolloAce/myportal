@@ -416,7 +416,7 @@ export class FirebaseCorporationManager {
   async getInviteByCode(inviteCode: string): Promise<CorporationInvite | null> {
     try {
       const invitesRef = collection(db, 'corporationInvites');
-      const q = query(invitesRef, where('code', '==', inviteCode));
+      const q = query(invitesRef, where('inviteCode', '==', inviteCode));
       const querySnapshot = await getDocs(q);
       
       if (querySnapshot.empty) {

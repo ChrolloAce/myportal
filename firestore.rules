@@ -27,6 +27,37 @@ service cloud.firestore {
       allow update: if request.auth != null;
     }
     
+    // Corporation rules
+    match /corporations/{corporationId} {
+      // Allow authenticated users to read corporation info
+      allow read: if request.auth != null;
+      
+      // Allow corporation owners/admins to update
+      allow create, update: if request.auth != null;
+    }
+    
+    // Corporation invites rules
+    match /corporationInvites/{inviteId} {
+      // Allow anyone to read invites (needed for invite links to work)  
+      allow read: if true;
+      
+      // Allow corporation admins to create/update invites
+      allow create, update: if request.auth != null;
+    }
+    
+    // Corporation members rules
+    match /corporationMembers/{memberId} {
+      // Allow authenticated users to read corporation members
+      allow read: if request.auth != null;
+      
+      // Allow users to create membership records (when joining)
+      allow create: if request.auth != null 
+        && request.auth.uid == request.resource.data.userId;
+        
+      // Allow corporation admins to update member status
+      allow update: if request.auth != null;
+    }
+    
     // Allow all authenticated users to read and write for now (we'll tighten later)
     match /{document=**} {
       allow read, write: if request.auth != null;

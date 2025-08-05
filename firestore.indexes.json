@@ -59,6 +59,48 @@
           "order": "DESCENDING"
         }
       ]
+    },
+    {
+      "collectionGroup": "corporationMembers",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "corporationId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "joinedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "corporationInvites",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "corporationId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "corporations",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "settings.allowPublicJoin",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "memberCount",
+          "order": "DESCENDING"
+        }
+      ]
     }
   ],
   "fieldOverrides": []
