@@ -223,10 +223,9 @@ export const CreatorOnboarding: React.FC<CreatorOnboardingProps> = ({
 }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<CreatorOnboardingData>({
-    username: '',
-    bio: '',
-    specialties: [],
-    socialHandles: {},
+    name: '',
+    instagramHandle: '',
+    tiktokHandle: '',
     inviteCode: ''
   });
 
@@ -259,7 +258,7 @@ export const CreatorOnboarding: React.FC<CreatorOnboardingProps> = ({
   const canProceed = () => {
     switch (currentStep) {
       case 1:
-        return formData.username.trim().length > 0;
+        return formData.name.trim().length > 0;
       case 2:
         return true; // Social media is optional
       case 3:
@@ -276,25 +275,16 @@ export const CreatorOnboarding: React.FC<CreatorOnboardingProps> = ({
           <StepContent>
             <StepTitle>✨ Set Up Your Profile</StepTitle>
             <StepDescription>
-              Tell us a bit about yourself as a content creator
+              Tell us your name to get started
             </StepDescription>
             
             <FormGroup>
-              <Label>Username *</Label>
+              <Label>Full Name *</Label>
               <Input
                 type="text"
-                value={formData.username}
-                onChange={(e) => updateFormData({ username: e.target.value })}
-                placeholder="Your creative username"
-              />
-            </FormGroup>
-            
-            <FormGroup>
-              <Label>Bio</Label>
-              <TextArea
-                value={formData.bio || ''}
-                onChange={(e) => updateFormData({ bio: e.target.value })}
-                placeholder="Tell everyone what makes your content special..."
+                value={formData.name}
+                onChange={(e) => updateFormData({ name: e.target.value })}
+                placeholder="Enter your full name"
               />
             </FormGroup>
           </StepContent>
@@ -305,7 +295,7 @@ export const CreatorOnboarding: React.FC<CreatorOnboardingProps> = ({
           <StepContent>
             <StepTitle>🔗 Connect Your Socials</StepTitle>
             <StepDescription>
-              Link your social media accounts to showcase your content
+              Add your Instagram and TikTok handles (optional)
             </StepDescription>
             
             <SocialInputGroup>
@@ -314,10 +304,8 @@ export const CreatorOnboarding: React.FC<CreatorOnboardingProps> = ({
               </SocialIcon>
               <Input
                 type="text"
-                value={formData.socialHandles.instagram || ''}
-                onChange={(e) => updateFormData({ 
-                  socialHandles: { ...formData.socialHandles, instagram: e.target.value }
-                })}
+                value={formData.instagramHandle || ''}
+                onChange={(e) => updateFormData({ instagramHandle: e.target.value })}
                 placeholder="@yourhandle"
               />
             </SocialInputGroup>
@@ -328,39 +316,9 @@ export const CreatorOnboarding: React.FC<CreatorOnboardingProps> = ({
               </SocialIcon>
               <Input
                 type="text"
-                value={formData.socialHandles.tiktok || ''}
-                onChange={(e) => updateFormData({ 
-                  socialHandles: { ...formData.socialHandles, tiktok: e.target.value }
-                })}
+                value={formData.tiktokHandle || ''}
+                onChange={(e) => updateFormData({ tiktokHandle: e.target.value })}
                 placeholder="@yourhandle"
-              />
-            </SocialInputGroup>
-            
-            <SocialInputGroup>
-              <SocialIcon className="twitter">
-                <Twitter size={20} />
-              </SocialIcon>
-              <Input
-                type="text"
-                value={formData.socialHandles.twitter || ''}
-                onChange={(e) => updateFormData({ 
-                  socialHandles: { ...formData.socialHandles, twitter: e.target.value }
-                })}
-                placeholder="@yourhandle"
-              />
-            </SocialInputGroup>
-            
-            <SocialInputGroup>
-              <SocialIcon className="youtube">
-                <Youtube size={20} />
-              </SocialIcon>
-              <Input
-                type="text"
-                value={formData.socialHandles.youtube || ''}
-                onChange={(e) => updateFormData({ 
-                  socialHandles: { ...formData.socialHandles, youtube: e.target.value }
-                })}
-                placeholder="@yourchannel"
               />
             </SocialInputGroup>
           </StepContent>
