@@ -220,7 +220,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 }) => {
   const [credentials, setCredentials] = useState<LoginCredentials>({
     email: '',
-    password: ''
+    password: '',
+    role: UserRole.CREATOR
   });
   const [showPassword, setShowPassword] = useState(false);
 
@@ -229,10 +230,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     if (!credentials.email || !credentials.password) return;
     
     try {
-      await onLogin({
-        ...credentials,
-        role: UserRole.CREATOR // Default role, will be determined by backend
-      });
+      await onLogin(credentials);
     } catch (error) {
       // Error handled by parent component
     }

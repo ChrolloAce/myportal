@@ -141,7 +141,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [submissions, setSubmissions] = useState<VideoSubmission[]>([]);
   const [stats, setStats] = useState<SubmissionStats | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   const submissionManager = FirebaseSubmissionManager.getInstance();
 
@@ -151,12 +151,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
         setLoading(true);
         
         if (user.corporationId) {
-          const [submissionsData, statsData] = await Promise.all([
+          const [submissionsResponse, statsData] = await Promise.all([
             submissionManager.getSubmissions(),
             submissionManager.getSubmissionStats()
           ]);
           
-          setSubmissions(submissionsData);
+          setSubmissions(submissionsResponse.data);
           setStats(statsData);
         }
       } catch (error) {
@@ -231,14 +231,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
             onSubmissionUpdate={() => {
               // Reload submissions when updated
               submissionManager.getSubmissions()
-                .then(setSubmissions);
+                .then(response => setSubmissions(response.data));
             }}
           />
         );
       case 'statistics':
-        return <AdminStatistics user={user} stats={stats} />;
+        return <AdminStatistics stats={stats} submissions={submissions} />;
       case 'users':
-        return <UserManagement user={user} />;
+        return <UserManagement />;
       case 'members':
         return user.corporationId ? (
           <CorporationMembers user={user} corporationId={user.corporationId} />
