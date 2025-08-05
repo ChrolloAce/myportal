@@ -352,7 +352,7 @@ export const InviteLanding: React.FC<InviteLandingProps> = ({
     }
   };
 
-  const handleGoogleSignIn = async (role: UserRole = UserRole.CREATOR) => {
+  const handleGoogleSignIn = async () => {
     try {
       setError(null);
       await authManager.signInWithGoogle();
