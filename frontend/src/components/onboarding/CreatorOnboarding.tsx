@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { theme } from '../../styles/theme';
-import { User, Instagram, Twitter, Youtube, ArrowRight, ArrowLeft, Check, Users, Link2 } from 'lucide-react';
+import { User, Instagram, ArrowRight, ArrowLeft, Check, Users, Link2 } from 'lucide-react';
 import { CreatorOnboardingData } from '../../types';
 
 interface CreatorOnboardingProps {
@@ -106,23 +106,6 @@ const Input = styled.input`
   }
 `;
 
-const TextArea = styled.textarea`
-  width: 100%;
-  padding: 1rem;
-  border: 2px solid ${theme.colors.neutral[200]};
-  border-radius: 12px;
-  font-size: 1rem;
-  min-height: 100px;
-  resize: vertical;
-  font-family: inherit;
-  transition: all 0.2s ease;
-  
-  &:focus {
-    outline: none;
-    border-color: ${theme.colors.primary[400]};
-    box-shadow: 0 0 0 3px ${theme.colors.primary[100]};
-  }
-`;
 
 const SocialInputGroup = styled.div`
   display: flex;
