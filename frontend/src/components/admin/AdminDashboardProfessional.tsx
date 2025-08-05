@@ -156,7 +156,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
             submissionManager.getSubmissionStats()
           ]);
           
-          setSubmissions(submissionsResponse.data);
+          setSubmissions(submissionsResponse.items);
           setStats(statsData);
         }
       } catch (error) {
@@ -231,7 +231,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
             onSubmissionUpdate={() => {
               // Reload submissions when updated
               submissionManager.getSubmissions()
-                .then(response => setSubmissions(response.data));
+                .then(response => setSubmissions(response.items));
             }}
           />
         );

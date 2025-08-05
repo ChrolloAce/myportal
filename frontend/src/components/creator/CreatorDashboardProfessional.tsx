@@ -312,7 +312,7 @@ export const CreatorDashboard: React.FC<CreatorDashboardProps> = ({ user, onLogo
       try {
         setLoading(true);
         const submissionsResponse = await submissionManager.getSubmissions();
-        setSubmissions(submissionsResponse.data);
+        setSubmissions(submissionsResponse.items);
       } catch (error) {
         console.error('Failed to load submissions:', error);
       } finally {
