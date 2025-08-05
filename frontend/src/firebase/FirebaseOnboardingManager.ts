@@ -41,10 +41,11 @@ export class FirebaseOnboardingManager {
 
       // Prepare creator user data
       const creatorData: Partial<CreatorUser> = {
-        username: data.username,
-        bio: data.bio,
-        specialties: data.specialties || [],
-        socialHandles: data.socialHandles,
+        username: data.name, // Use name as username
+        socialHandles: {
+          instagram: data.instagramHandle || '',
+          tiktok: data.tiktokHandle || ''
+        },
         onboardingCompleted: true,
         onboardingSteps: {
           profileSetup: true,
@@ -61,10 +62,8 @@ export class FirebaseOnboardingManager {
           const corporation = await this.corporationManager.joinCorporation(userId, {
             inviteCode: data.inviteCode,
             creatorInfo: {
-              instagramHandle: data.socialHandles.instagram,
-              tiktokHandle: data.socialHandles.tiktok,
-              bio: data.bio,
-              specialties: data.specialties
+              instagramHandle: data.instagramHandle || '',
+              tiktokHandle: data.tiktokHandle || ''
             }
           });
 

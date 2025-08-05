@@ -253,7 +253,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({
           <StepContent>
             <StepTitle>Personal Information</StepTitle>
             <StepDescription>
-              Tell us a bit about yourself to personalize your experience.
+              Tell us your name and social media handles to get started.
             </StepDescription>
 
             <FormGroup>
@@ -266,34 +266,25 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({
               />
             </FormGroup>
 
-            <FormGroup>
-              <FormLabel>Bio</FormLabel>
-              <Textarea
-                placeholder="Tell us about yourself..."
-                value={formData.bio || ''}
-                onChange={(e) => updateFormData('bio', e.target.value)}
-              />
-            </FormGroup>
-
             {userRole === UserRole.CREATOR && (
               <>
                 <FormGroup>
-                  <FormLabel>Skills & Expertise</FormLabel>
+                  <FormLabel>Instagram Handle (Optional)</FormLabel>
                   <Input
                     type="text"
-                    placeholder="e.g. Video editing, Motion graphics, Photography"
-                    value={formData.skills || ''}
-                    onChange={(e) => updateFormData('skills', e.target.value)}
+                    placeholder="@yourusername"
+                    value={formData.instagramHandle || ''}
+                    onChange={(e) => updateFormData('instagramHandle', e.target.value)}
                   />
                 </FormGroup>
 
                 <FormGroup>
-                  <FormLabel>Portfolio URL (Optional)</FormLabel>
+                  <FormLabel>TikTok Handle (Optional)</FormLabel>
                   <Input
-                    type="url"
-                    placeholder="https://your-portfolio.com"
-                    value={formData.portfolioUrl || ''}
-                    onChange={(e) => updateFormData('portfolioUrl', e.target.value)}
+                    type="text"
+                    placeholder="@yourusername"
+                    value={formData.tiktokHandle || ''}
+                    onChange={(e) => updateFormData('tiktokHandle', e.target.value)}
                   />
                 </FormGroup>
               </>

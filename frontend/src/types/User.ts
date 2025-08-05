@@ -94,21 +94,12 @@ export interface RegisterData extends LoginCredentials {
 
 // Onboarding data interfaces
 export interface CreatorOnboardingData {
-  // Step 1: Profile Setup
-  username: string;
-  bio?: string;
-  specialties?: string[];
-  profilePicture?: string;
+  // Simplified creator onboarding
+  name: string;
+  instagramHandle?: string;
+  tiktokHandle?: string;
   
-  // Step 2: Social Media Handles
-  socialHandles: {
-    instagram?: string;
-    tiktok?: string;
-    twitter?: string;
-    youtube?: string;
-  };
-  
-  // Step 3: Corporation (optional)
+  // Corporation join (optional)
   inviteCode?: string;
 }
 
