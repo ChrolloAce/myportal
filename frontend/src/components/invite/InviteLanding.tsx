@@ -8,11 +8,13 @@ import styled from 'styled-components';
 import { theme } from '../../styles/theme';
 import { 
   Building2, UserPlus, CheckCircle, XCircle,
-  Instagram, Twitter, Globe, ArrowRight
+  Instagram, Twitter, Globe, ArrowRight, LogIn, UserPlus as UserPlusIcon
 } from 'lucide-react';
 import { FirebaseCorporationManager } from '../../firebase/FirebaseCorporationManager';
 import { FirebaseAuthManager } from '../../firebase/FirebaseAuthManager';
-import { Corporation, CorporationInvite } from '../../types';
+import { Corporation, CorporationInvite, LoginCredentials, RegisterData } from '../../types';
+import { LoginForm } from '../auth/LoginForm';
+import { RegisterForm } from '../auth/RegisterForm';
 
 interface InviteLandingProps {
   inviteCode: string;
@@ -232,6 +234,8 @@ export const InviteLanding: React.FC<InviteLandingProps> = ({
   const [isJoining, setIsJoining] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [joinSuccess, setJoinSuccess] = useState(false);
+  const [authMode, setAuthMode] = useState<'none' | 'login' | 'register'>('none');
+  const [shouldAutoJoin, setShouldAutoJoin] = useState(false);
 
   const corporationManager = FirebaseCorporationManager.getInstance();
   const authManager = FirebaseAuthManager.getInstance();
@@ -290,7 +294,9 @@ export const InviteLanding: React.FC<InviteLandingProps> = ({
 
     const currentUser = authManager.getCurrentUser();
     if (!currentUser) {
-      setError('You must be logged in to join a corporation');
+      // Show authentication options instead of error
+      setAuthMode('login');
+      setShouldAutoJoin(true);
       return;
     }
 
@@ -311,6 +317,54 @@ export const InviteLanding: React.FC<InviteLandingProps> = ({
       setError(error instanceof Error ? error.message : 'Failed to join corporation');
     } finally {
       setIsJoining(false);
+    }
+  };
+
+  const handleLogin = async (credentials: LoginCredentials) => {
+    try {
+      setError(null);
+      await authManager.signIn(credentials);
+      setAuthMode('none');
+      
+      // Auto-join after successful login
+      if (shouldAutoJoin) {
+        setShouldAutoJoin(false);
+        setTimeout(() => handleJoinCorporation(), 500);
+      }
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Login failed');
+    }
+  };
+
+  const handleRegister = async (data: RegisterData) => {
+    try {
+      setError(null);
+      await authManager.register(data);
+      setAuthMode('none');
+      
+      // Auto-join after successful registration
+      if (shouldAutoJoin) {
+        setShouldAutoJoin(false);
+        setTimeout(() => handleJoinCorporation(), 500);
+      }
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Registration failed');
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setError(null);
+      await authManager.signInWithGoogle();
+      setAuthMode('none');
+      
+      // Auto-join after successful Google sign-in
+      if (shouldAutoJoin) {
+        setShouldAutoJoin(false);
+        setTimeout(() => handleJoinCorporation(), 500);
+      }
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Google sign-in failed');
     }
   };
 
@@ -363,6 +417,93 @@ export const InviteLanding: React.FC<InviteLandingProps> = ({
             <h3>Invalid Invite</h3>
             <p>This invite link is not valid or has expired.</p>
           </ErrorState>
+        </InviteCard>
+      </LandingContainer>
+    );
+  }
+
+  // Show auth forms when user needs to login/register
+  if (authMode === 'login') {
+    return (
+      <LandingContainer>
+        <InviteCard>
+          <InviteHeader>
+            <InviteIcon>
+              <LogIn size={40} />
+            </InviteIcon>
+            <InviteTitle>Sign In to Join</InviteTitle>
+            <InviteSubtitle>
+              Sign in to join {corporation.displayName}
+            </InviteSubtitle>
+          </InviteHeader>
+
+          <LoginForm
+            onSubmit={handleLogin}
+            onGoogleSignIn={handleGoogleSignIn}
+            isLoading={false}
+            error={error}
+          />
+
+          <div style={{ marginTop: '1rem', textAlign: 'center' }}>
+            <p style={{ color: theme.colors.gray[600], fontSize: '0.9rem' }}>
+              Don't have an account?{' '}
+              <button
+                onClick={() => setAuthMode('register')}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: theme.colors.primary[500],
+                  cursor: 'pointer',
+                  textDecoration: 'underline'
+                }}
+              >
+                Create one
+              </button>
+            </p>
+          </div>
+        </InviteCard>
+      </LandingContainer>
+    );
+  }
+
+  if (authMode === 'register') {
+    return (
+      <LandingContainer>
+        <InviteCard>
+          <InviteHeader>
+            <InviteIcon>
+              <UserPlusIcon size={40} />
+            </InviteIcon>
+            <InviteTitle>Create Account to Join</InviteTitle>
+            <InviteSubtitle>
+              Create an account to join {corporation.displayName}
+            </InviteSubtitle>
+          </InviteHeader>
+
+          <RegisterForm
+            onSubmit={handleRegister}
+            onGoogleSignIn={handleGoogleSignIn}
+            isLoading={false}
+            error={error}
+          />
+
+          <div style={{ marginTop: '1rem', textAlign: 'center' }}>
+            <p style={{ color: theme.colors.gray[600], fontSize: '0.9rem' }}>
+              Already have an account?{' '}
+              <button
+                onClick={() => setAuthMode('login')}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: theme.colors.primary[500],
+                  cursor: 'pointer',
+                  textDecoration: 'underline'
+                }}
+              >
+                Sign in
+              </button>
+            </p>
+          </div>
         </InviteCard>
       </LandingContainer>
     );

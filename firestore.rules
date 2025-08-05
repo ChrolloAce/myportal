@@ -29,8 +29,8 @@ service cloud.firestore {
     
     // Corporation rules
     match /corporations/{corporationId} {
-      // Allow authenticated users to read corporation info
-      allow read: if request.auth != null;
+      // Allow ANYONE to read corporation info (needed for invite pages)
+      allow read: if true;
       
       // Allow corporation owners/admins to update
       allow create, update: if request.auth != null;
