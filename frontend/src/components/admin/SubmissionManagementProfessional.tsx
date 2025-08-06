@@ -13,14 +13,11 @@ import {
   ExternalLink, 
   Check, 
   X, 
-  Filter, 
   Search,
   PlayCircle,
   Calendar,
   User,
-  Eye,
   Download,
-  MoreHorizontal,
   CheckCircle,
   Clock,
   XCircle
@@ -346,7 +343,11 @@ export const SubmissionManagement: React.FC<SubmissionManagementProps> = ({
   const handleStatusUpdate = async (submissionId: string, newStatus: SubmissionStatus) => {
     try {
       setIsUpdating(submissionId);
-      await submissionManager.updateSubmissionStatus(submissionId, newStatus);
+      await submissionManager.performAdminAction({
+      submissionId,
+      action: newStatus === SubmissionStatus.APPROVED ? 'approve' : 'reject',
+      feedback: ''
+    });
       onSubmissionUpdate();
     } catch (error) {
       console.error('Failed to update submission:', error);
@@ -409,8 +410,8 @@ export const SubmissionManagement: React.FC<SubmissionManagementProps> = ({
         >
           <option value="all">All Status</option>
           <option value="pending">Pending</option>
-          <option value="approved">Approved</option>
-          <option value="rejected">Rejected</option>
+                          <option value={SubmissionStatus.APPROVED}>Approved</option>
+                <option value={SubmissionStatus.REJECTED}>Rejected</option>
         </FilterSelect>
         
         <FilterSelect
@@ -455,8 +456,8 @@ export const SubmissionManagement: React.FC<SubmissionManagementProps> = ({
                     <TableCell>
                       <SubmissionPreview>
                         <PreviewThumbnail>
-                          {submission.thumbnailUrl ? (
-                            <img src={submission.thumbnailUrl} alt="Thumbnail" />
+                                          {submission.tiktokUrl || submission.instagramUrl ? (
+                  <PlayCircle size={24} />
                           ) : (
                             <PlayCircle size={20} />
                           )}
@@ -513,11 +514,11 @@ export const SubmissionManagement: React.FC<SubmissionManagementProps> = ({
                     
                     <TableCell>
                       <ActionButtons>
-                        {submission.status === 'pending' && (
+                        {submission.status === SubmissionStatus.PENDING && (
                           <>
                             <ActionButton
                               variant="approve"
-                              onClick={() => handleStatusUpdate(submission.id, 'approved')}
+                              onClick={() => handleStatusUpdate(submission.id, SubmissionStatus.APPROVED)}
                               disabled={isUpdating === submission.id}
                               title="Approve"
                             >
@@ -525,7 +526,7 @@ export const SubmissionManagement: React.FC<SubmissionManagementProps> = ({
                             </ActionButton>
                             <ActionButton
                               variant="reject"
-                              onClick={() => handleStatusUpdate(submission.id, 'rejected')}
+                              onClick={() => handleStatusUpdate(submission.id, SubmissionStatus.REJECTED)}
                               disabled={isUpdating === submission.id}
                               title="Reject"
                             >

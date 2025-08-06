@@ -11,7 +11,6 @@ import {
   Users, 
   UserPlus, 
   Search, 
-  Filter,
   MoreHorizontal,
   Mail,
   Calendar,
@@ -272,13 +271,13 @@ const RoleBadge = styled.div<{ role: string }>`
     switch (props.role) {
       case 'admin':
         return `
-          background: ${professionalTheme.colors.brand[100]};
-          color: ${professionalTheme.colors.brand[700]};
+          background: ${professionalTheme.colors.primary[100]};
+          color: ${professionalTheme.colors.primary[700]};
         `;
       case 'creator':
         return `
-          background: ${professionalTheme.colors.primary[100]};
-          color: ${professionalTheme.colors.primary[700]};
+          background: ${professionalTheme.colors.success[100]};
+          color: ${professionalTheme.colors.success[700]};
         `;
       default:
         return `
@@ -426,7 +425,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({ users = mockUser
           <StatLabel>Active Users</StatLabel>
         </StatCard>
 
-        <StatCard gradient={`linear-gradient(135deg, ${professionalTheme.colors.brand[500]} 0%, ${professionalTheme.colors.brand[600]} 100%)`}>
+        <StatCard gradient={`linear-gradient(135deg, ${professionalTheme.colors.brand.purple} 0%, ${professionalTheme.colors.brand.indigo} 100%)`}>
           <StatIcon>
             <Crown size={20} />
           </StatIcon>
