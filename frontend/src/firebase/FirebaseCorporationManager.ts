@@ -307,7 +307,7 @@ export class FirebaseCorporationManager {
         role: invite.role,
         joinedAt: new Date().toISOString(),
         invitedBy: invite.createdBy,
-        status: corporation.settings.requireApproval ? 'pending' : 'active'
+        status: corporation.settings?.requireApproval ? 'pending' : 'active'
       };
 
       const memberRef = doc(collection(db, 'corporationMembers'));
@@ -488,7 +488,7 @@ export class FirebaseCorporationManager {
         userId,
         corporationId: invite.corporationId,
         role: 'creator',
-        status: corporation.settings.requireApproval ? 'pending' : 'active',
+        status: corporation.settings?.requireApproval ? 'pending' : 'active',
         joinedAt: new Date().toISOString(),
         invitedBy: invite.createdBy
       };
@@ -561,7 +561,7 @@ export class FirebaseCorporationManager {
         throw new Error('Corporation not found');
       }
 
-      if (!corporation.settings.allowPublicJoin) {
+      if (!corporation.settings?.allowPublicJoin) {
         throw new Error('This corporation does not allow public joining');
       }
 
@@ -579,7 +579,7 @@ export class FirebaseCorporationManager {
         corporationId,
         role: 'creator',
         joinedAt: new Date().toISOString(),
-        status: corporation.settings.requireApproval ? 'pending' : 'active'
+        status: corporation.settings?.requireApproval ? 'pending' : 'active'
       };
 
       const memberRef = doc(collection(db, 'corporationMembers'));

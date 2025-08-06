@@ -12,13 +12,8 @@ import { AdminUser, Corporation } from '../../types';
 import { 
   Building2, 
   Save, 
-  Globe, 
   Mail, 
-  Phone, 
-  MapPin,
   Users,
-  Settings,
-  Shield,
   Bell
 } from 'lucide-react';
 
@@ -173,22 +168,24 @@ export const AgencySettings: React.FC<AgencySettingsProps> = ({ user }) => {
     try {
       setIsLoading(true);
       const corpData = await corporationManager.getCorporation(user.corporationId);
-      setCorporation(corpData);
-      setFormData({
-        displayName: corpData.displayName || '',
-        description: corpData.description || '',
-        industry: corpData.industry || '',
-        website: corpData.website || '',
-        email: corpData.email || '',
-        phone: corpData.phone || '',
-        address: corpData.address || ''
-      });
-      setSettings({
-        allowPublicJoin: corpData.settings?.allowPublicJoin || false,
-        requireApproval: corpData.settings?.requireApproval || true,
-        emailNotifications: corpData.settings?.emailNotifications || true,
-        weeklyReports: corpData.settings?.weeklyReports || true
-      });
+      if (corpData) {
+        setCorporation(corpData);
+        setFormData({
+          displayName: corpData.displayName || '',
+          description: corpData.description || '',
+          industry: corpData.industry || '',
+          website: corpData.website || '',
+          email: corpData.email || '',
+          phone: corpData.phone || '',
+          address: corpData.address || ''
+        });
+        setSettings({
+          allowPublicJoin: corpData.settings?.allowPublicJoin || false,
+          requireApproval: corpData.settings?.requireApproval || true,
+          emailNotifications: corpData.settings?.emailNotifications || true,
+          weeklyReports: corpData.settings?.weeklyReports || true
+        });
+      }
     } catch (error) {
       console.error('Error loading corporation data:', error);
     } finally {

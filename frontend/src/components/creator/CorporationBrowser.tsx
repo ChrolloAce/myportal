@@ -392,7 +392,7 @@ export const CorporationBrowser: React.FC<CorporationBrowserProps> = ({
                 </SocialLinks>
               )}
 
-              {corp.settings.requireApproval && (
+              {corp.settings?.requireApproval && (
                 <RequiresApproval>
                   <Clock size={14} />
                   Requires approval to join
@@ -402,14 +402,14 @@ export const CorporationBrowser: React.FC<CorporationBrowserProps> = ({
               <JoinButton
                 onClick={() => handleJoinCorporation(corp.id)}
                 disabled={joiningIds.has(corp.id)}
-                variant={corp.settings.requireApproval ? 'pending' : 'primary'}
+                variant={corp.settings?.requireApproval ? 'pending' : 'primary'}
               >
                 {joiningIds.has(corp.id) ? (
                   <>
                     <div className="spinner" />
                     Joining...
                   </>
-                ) : corp.settings.requireApproval ? (
+                ) : corp.settings?.requireApproval ? (
                   <>
                     <Clock size={16} />
                     Request to Join
