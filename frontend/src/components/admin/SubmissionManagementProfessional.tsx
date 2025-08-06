@@ -456,7 +456,7 @@ export const SubmissionManagement: React.FC<SubmissionManagementProps> = ({
                     <TableCell>
                       <SubmissionPreview>
                         <PreviewThumbnail>
-                                          {submission.tiktokUrl || submission.instagramUrl ? (
+                                          {submission.videoUrl ? (
                   <PlayCircle size={24} />
                           ) : (
                             <PlayCircle size={20} />
