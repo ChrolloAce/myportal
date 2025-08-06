@@ -1,12 +1,12 @@
 /**
- * CreatorDashboard - Main interface for content creators
- * Simple, joyful experience focused on video submission
+ * CreatorDashboard - Professional interface for content creators
+ * Clean, modern experience focused on video submission
  */
 
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { theme } from '../../styles/theme';
-import { Container } from '../../styles/GlobalStyles';
+import { professionalTheme } from '../../styles/professionalTheme';
+import { Container, Card } from '../../styles/ProfessionalStyles';
 import { VideoSubmissionForm } from './VideoSubmissionForm';
 import { SubmissionHistory } from './SubmissionHistory';
 import { DashboardHeader } from './DashboardHeader';
@@ -21,37 +21,79 @@ interface CreatorDashboardProps {
 
 const DashboardContainer = styled.div`
   min-height: 100vh;
-  background: ${theme.colors.neutral[50]};
+  background: ${professionalTheme.colors.gray[25]};
 `;
 
 const MainContent = styled.main`
-  padding: ${theme.spacing[6]} 0;
+  padding: ${professionalTheme.spacing[8]} 0;
+`;
+
+const StatsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: ${professionalTheme.spacing[6]};
+  margin-bottom: ${professionalTheme.spacing[8]};
+`;
+
+const StatCard = styled(Card)`
+  padding: ${professionalTheme.spacing[6]};
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: ${professionalTheme.colors.white};
+  border: none;
+  
+  &:nth-child(2) {
+    background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+  }
+  
+  &:nth-child(3) {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  }
+`;
+
+const StatValue = styled.div`
+  font-size: ${professionalTheme.typography.fontSize['3xl']};
+  font-weight: ${professionalTheme.typography.fontWeight.bold};
+  margin-bottom: ${professionalTheme.spacing[2]};
+`;
+
+const StatLabel = styled.div`
+  font-size: ${professionalTheme.typography.fontSize.sm};
+  opacity: 0.9;
+  margin-bottom: ${professionalTheme.spacing[1]};
+`;
+
+const StatChange = styled.div`
+  font-size: ${professionalTheme.typography.fontSize.xs};
+  opacity: 0.8;
 `;
 
 const DashboardGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: ${theme.spacing[8]};
+  gap: ${professionalTheme.spacing[8]};
   align-items: start;
   
-  @media (max-width: ${theme.breakpoints.lg}) {
+  @media (max-width: ${professionalTheme.breakpoints.lg}) {
     grid-template-columns: 1fr;
-    gap: ${theme.spacing[6]};
+    gap: ${professionalTheme.spacing[6]};
   }
 `;
 
 const WelcomeSection = styled.section`
-  margin-bottom: ${theme.spacing[8]};
+  margin-bottom: ${professionalTheme.spacing[8]};
 `;
 
 const WelcomeTitle = styled.h1`
-  margin-bottom: ${theme.spacing[2]};
-  color: ${theme.colors.neutral[900]};
+  margin-bottom: ${professionalTheme.spacing[4]};
+  color: ${professionalTheme.colors.gray[900]};
+  font-size: ${professionalTheme.typography.fontSize['2xl']};
+  font-weight: ${professionalTheme.typography.fontWeight.semibold};
 `;
 
 const WelcomeMessage = styled.p`
-  font-size: ${theme.typography.fontSize.lg};
-  color: ${theme.colors.neutral[600]};
+  font-size: ${professionalTheme.typography.fontSize.base};
+  color: ${professionalTheme.colors.gray[600]};
+  margin-bottom: ${professionalTheme.spacing[6]};
 `;
 
 const LoadingContainer = styled.div`
@@ -62,11 +104,20 @@ const LoadingContainer = styled.div`
 `;
 
 const ErrorMessage = styled.div`
-  padding: ${theme.spacing[4]};
-  background: ${theme.colors.error.light};
-  color: ${theme.colors.error.dark};
-  border-radius: ${theme.borderRadius.md};
-  margin-bottom: ${theme.spacing[6]};
+  background: ${professionalTheme.colors.error[50]};
+  border: 1px solid ${professionalTheme.colors.error[200]};
+  color: ${professionalTheme.colors.error[700]};
+  padding: ${professionalTheme.spacing[4]};
+  border-radius: ${professionalTheme.borderRadius.md};
+  margin-bottom: ${professionalTheme.spacing[6]};
+  font-size: ${professionalTheme.typography.fontSize.sm};
+`;
+
+const SectionTitle = styled.h2`
+  font-size: ${professionalTheme.typography.fontSize.lg};
+  font-weight: ${professionalTheme.typography.fontWeight.semibold};
+  color: ${professionalTheme.colors.gray[900]};
+  margin-bottom: ${professionalTheme.spacing[4]};
 `;
 
 export const CreatorDashboard: React.FC<CreatorDashboardProps> = ({
@@ -121,11 +172,31 @@ export const CreatorDashboard: React.FC<CreatorDashboardProps> = ({
       <Container>
         <MainContent>
           <WelcomeSection className="fade-in">
-            <WelcomeTitle>Welcome back, {user.username}! 👋</WelcomeTitle>
+            <WelcomeTitle>Welcome back, {user.username}</WelcomeTitle>
             <WelcomeMessage>
-              Ready to share your latest creation? Submit your video below and track its progress.
+              Track performance metrics and analyze trends across your content submissions.
             </WelcomeMessage>
           </WelcomeSection>
+
+          <StatsGrid>
+            <StatCard>
+              <StatValue>12</StatValue>
+              <StatLabel>Total Submissions</StatLabel>
+              <StatChange>+2.5% vs last month</StatChange>
+            </StatCard>
+            
+            <StatCard>
+              <StatValue>8</StatValue>
+              <StatLabel>Approved Content</StatLabel>
+              <StatChange>+18.2% vs last month</StatChange>
+            </StatCard>
+            
+            <StatCard>
+              <StatValue>67%</StatValue>
+              <StatLabel>Approval Rate</StatLabel>
+              <StatChange>+12% vs last month</StatChange>
+            </StatCard>
+          </StatsGrid>
 
           {error && (
             <ErrorMessage className="slide-in">
@@ -141,7 +212,7 @@ export const CreatorDashboard: React.FC<CreatorDashboardProps> = ({
             />
             
             <div>
-              <h2 style={{ marginBottom: theme.spacing[4] }}>Your Submissions</h2>
+              <SectionTitle>Your Submissions</SectionTitle>
               {isLoading ? (
                 <LoadingContainer>
                   <LoadingSpinner size="lg" />

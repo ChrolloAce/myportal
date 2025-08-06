@@ -24,7 +24,7 @@ interface OnboardingWizardProps {
 
 const OnboardingContainer = styled.div`
   min-height: 100vh;
-  background: linear-gradient(135deg, ${professionalTheme.colors.primary[50]} 0%, ${professionalTheme.colors.gray[50]} 100%);
+  background: ${professionalTheme.colors.gray[25]};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -34,9 +34,11 @@ const OnboardingContainer = styled.div`
 const OnboardingCard = styled(Card)`
   width: 100%;
   max-width: 600px;
-  padding: ${professionalTheme.spacing[8]};
+  padding: ${professionalTheme.spacing[10]};
   position: relative;
   overflow: hidden;
+  box-shadow: ${professionalTheme.shadows.xl};
+  border: 1px solid ${professionalTheme.colors.gray[100]};
 `;
 
 const ProgressBar = styled.div`
@@ -50,7 +52,7 @@ const ProgressBar = styled.div`
 
 const ProgressFill = styled.div<{ progress: number }>`
   height: 100%;
-  background: linear-gradient(90deg, ${professionalTheme.colors.primary[500]}, ${professionalTheme.colors.primary[600]});
+  background: linear-gradient(90deg, #3b82f6, #1d4ed8);
   width: ${props => props.progress}%;
   transition: ${professionalTheme.transitions.all};
   border-radius: 0 2px 2px 0;
@@ -147,18 +149,24 @@ const StepTitle = styled.h2`
   font-size: ${professionalTheme.typography.fontSize['2xl']};
   font-weight: ${professionalTheme.typography.fontWeight.semibold};
   color: ${professionalTheme.colors.gray[900]};
-  margin-bottom: ${professionalTheme.spacing[3]};
+  margin-bottom: ${professionalTheme.spacing[4]};
+  text-align: center;
 `;
 
 const StepDescription = styled.p`
   font-size: ${professionalTheme.typography.fontSize.base};
   color: ${professionalTheme.colors.gray[600]};
   line-height: ${professionalTheme.typography.lineHeight.relaxed};
-  margin-bottom: ${professionalTheme.spacing[6]};
+  margin-bottom: ${professionalTheme.spacing[10]};
+  text-align: center;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: ${professionalTheme.spacing[10]};
 `;
 
 const FormGroup = styled.div`
-  margin-bottom: ${professionalTheme.spacing[5]};
+  margin-bottom: ${professionalTheme.spacing[8]};
 `;
 
 const FormLabel = styled.label`
@@ -166,7 +174,7 @@ const FormLabel = styled.label`
   font-size: ${professionalTheme.typography.fontSize.sm};
   font-weight: ${professionalTheme.typography.fontWeight.semibold};
   color: ${professionalTheme.colors.gray[700]};
-  margin-bottom: ${professionalTheme.spacing[2]};
+  margin-bottom: ${professionalTheme.spacing[3]};
 `;
 
 const FormActions = styled.div`
@@ -175,15 +183,26 @@ const FormActions = styled.div`
   justify-content: space-between;
   gap: ${professionalTheme.spacing[4]};
   margin-top: auto;
-  padding-top: ${professionalTheme.spacing[6]};
+  padding-top: ${professionalTheme.spacing[8]};
+  border-top: 1px solid ${professionalTheme.colors.gray[200]};
 `;
 
 const BackButton = styled(Button)`
   flex: 0 0 auto;
+  min-width: 120px;
 `;
 
 const NextButton = styled(Button)`
   flex: 1;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border: none;
+  font-weight: ${professionalTheme.typography.fontWeight.semibold};
+  
+  &:hover:not(:disabled) {
+    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+    transform: translateY(-1px);
+    box-shadow: ${professionalTheme.shadows.lg};
+  }
 `;
 
 
@@ -311,7 +330,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({
               <NextButton 
                 variant="primary" 
                 onClick={handleNext}
-                disabled={!formData.name}
+                disabled={userRole === UserRole.ADMIN ? !formData.username : !formData.name}
               >
                 {userRole === UserRole.ADMIN ? 'Next' : 'Complete Setup'}
                 <ArrowRight size={16} />

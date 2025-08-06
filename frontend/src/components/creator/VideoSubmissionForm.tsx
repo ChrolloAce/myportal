@@ -1,12 +1,12 @@
 /**
- * VideoSubmissionForm - Clean, intuitive video submission interface
- * Single-purpose component for video URL submission
+ * VideoSubmissionForm - Professional video submission interface
+ * Clean, modern component for video URL submission
  */
 
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { theme } from '../../styles/theme';
-import { Card, Button, Input } from '../../styles/GlobalStyles';
+import { professionalTheme } from '../../styles/professionalTheme';
+import { Card, Button, Input } from '../../styles/ProfessionalStyles';
 import { LoadingSpinner } from '../shared/LoadingSpinner';
 import { SubmissionFormData, CreatorUser, Corporation } from '../../types';
 import { FirebaseCorporationManager } from '../../firebase/FirebaseCorporationManager';
@@ -19,98 +19,96 @@ interface VideoSubmissionFormProps {
 
 const FormCard = styled(Card)`
   height: fit-content;
+  padding: ${professionalTheme.spacing[6]};
 `;
 
 const FormTitle = styled.h2`
-  margin-bottom: ${theme.spacing[6]};
-  color: ${theme.colors.neutral[900]};
+  margin-bottom: ${professionalTheme.spacing[6]};
+  color: ${professionalTheme.colors.gray[900]};
+  font-size: ${professionalTheme.typography.fontSize.xl};
+  font-weight: ${professionalTheme.typography.fontWeight.semibold};
   text-align: center;
 `;
 
 const Form = styled.form`
   display: flex;
   flex-direction: column;
-  gap: ${theme.spacing[4]};
+  gap: ${professionalTheme.spacing[5]};
 `;
 
 const InputGroup = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${theme.spacing[2]};
+  gap: ${professionalTheme.spacing[2]};
 `;
 
 const Label = styled.label`
-  font-weight: ${theme.typography.fontWeight.medium};
-  color: ${theme.colors.neutral[700]};
-  font-size: ${theme.typography.fontSize.sm};
+  font-weight: ${professionalTheme.typography.fontWeight.medium};
+  color: ${professionalTheme.colors.gray[700]};
+  font-size: ${professionalTheme.typography.fontSize.sm};
 `;
 
-
-
 const SubmitButton = styled(Button)`
-  margin-top: ${theme.spacing[2]};
+  margin-top: ${professionalTheme.spacing[2]};
 `;
 
 const SuccessMessage = styled.div`
-  padding: ${theme.spacing[3]} ${theme.spacing[4]};
-  background: ${theme.colors.success.light};
-  color: ${theme.colors.success.dark};
-  border-radius: ${theme.borderRadius.md};
-  margin-bottom: ${theme.spacing[4]};
+  background: ${professionalTheme.colors.success[50]};
+  border: 1px solid ${professionalTheme.colors.success[200]};
+  color: ${professionalTheme.colors.success[700]};
+  padding: ${professionalTheme.spacing[4]};
+  border-radius: ${professionalTheme.borderRadius.md};
+  margin-bottom: ${professionalTheme.spacing[4]};
   text-align: center;
-  font-weight: ${theme.typography.fontWeight.medium};
+  font-weight: ${professionalTheme.typography.fontWeight.medium};
+  font-size: ${professionalTheme.typography.fontSize.sm};
 `;
 
 const Select = styled.select`
   width: 100%;
-  padding: ${theme.spacing[3]};
-  border: 2px solid ${theme.colors.neutral[200]};
-  border-radius: ${theme.borderRadius.md};
-  font-size: ${theme.typography.fontSize.base};
-  background: ${theme.colors.neutral[0]};
-  color: ${theme.colors.neutral[900]};
-  transition: all ${theme.transitions.fast};
+  padding: ${professionalTheme.spacing[3]} ${professionalTheme.spacing[4]};
+  border: 1px solid ${professionalTheme.borders.color.default};
+  border-radius: ${professionalTheme.borderRadius.md};
+  font-size: ${professionalTheme.typography.fontSize.sm};
+  background: ${professionalTheme.colors.white};
+  color: ${professionalTheme.colors.gray[900]};
+  transition: ${professionalTheme.transitions.all};
+  font-family: ${professionalTheme.typography.fontFamily.sans};
   
   &:focus {
     outline: none;
-    border-color: ${theme.colors.primary[400]};
-    box-shadow: 0 0 0 3px ${theme.colors.primary[100]};
+    border-color: ${professionalTheme.colors.primary[500]};
+    box-shadow: 0 0 0 3px ${professionalTheme.colors.primary[100]};
   }
 `;
 
 const NoAgencyCard = styled.div`
-  background: linear-gradient(135deg, ${theme.colors.warning.light} 0%, ${theme.colors.warning.light}40 100%);
-  border: 2px solid ${theme.colors.warning.light};
-  border-radius: ${theme.borderRadius.lg};
-  padding: ${theme.spacing[6]};
+  background: ${professionalTheme.colors.warning[50]};
+  border: 1px solid ${professionalTheme.colors.warning[200]};
+  border-radius: ${professionalTheme.borderRadius.lg};
+  padding: ${professionalTheme.spacing[8]};
   text-align: center;
-  margin-bottom: ${theme.spacing[6]};
 `;
 
 const NoAgencyTitle = styled.h3`
-  color: ${theme.colors.warning.dark};
-  font-weight: ${theme.typography.fontWeight.bold};
-  margin-bottom: ${theme.spacing[2]};
+  color: ${professionalTheme.colors.warning[700]};
+  font-weight: ${professionalTheme.typography.fontWeight.semibold};
+  font-size: ${professionalTheme.typography.fontSize.lg};
+  margin-bottom: ${professionalTheme.spacing[3]};
 `;
 
 const NoAgencyDescription = styled.p`
-  color: ${theme.colors.warning.dark};
-  margin-bottom: ${theme.spacing[4]};
+  color: ${professionalTheme.colors.warning[600]};
+  font-size: ${professionalTheme.typography.fontSize.sm};
+  margin-bottom: ${professionalTheme.spacing[6]};
+  line-height: ${professionalTheme.typography.lineHeight.relaxed};
 `;
 
-const JoinAgencyButton = styled.button`
-  background: ${theme.colors.primary[500]};
-  color: white;
-  border: none;
-  padding: ${theme.spacing[3]} ${theme.spacing[6]};
-  border-radius: ${theme.borderRadius.md};
-  font-weight: ${theme.typography.fontWeight.semibold};
-  cursor: pointer;
-  transition: all ${theme.transitions.fast};
+const JoinAgencyButton = styled(Button)`
+  background: ${professionalTheme.colors.primary[500]};
   
-  &:hover {
-    background: ${theme.colors.primary[600]};
-    transform: translateY(-1px);
+  &:hover:not(:disabled) {
+    background: ${professionalTheme.colors.primary[600]};
   }
 `;
 
@@ -205,14 +203,14 @@ export const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
       }));
     };
 
-  const getFormEmoji = (): string => {
+  const getFormTitle = (): string => {
     const hasTikTok = formData.tiktokUrl?.trim();
     const hasInstagram = formData.instagramUrl?.trim();
     
-    if (hasTikTok && hasInstagram) return '🎬'; // Both platforms
-    if (hasTikTok) return '🎵'; // TikTok only
-    if (hasInstagram) return '📸'; // Instagram only
-    return '✨'; // Default
+    if (hasTikTok && hasInstagram) return 'Submit Multi-Platform Content';
+    if (hasTikTok) return 'Submit TikTok Content';
+    if (hasInstagram) return 'Submit Instagram Content';
+    return 'Submit Your Content';
   };
 
   // Show no agency prompt if user has no corporation
@@ -220,10 +218,10 @@ export const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
     return (
       <FormCard className="slide-in">
         <NoAgencyCard>
-          <NoAgencyTitle>🏢 Join an Agency First</NoAgencyTitle>
+          <NoAgencyTitle>Join an Agency First</NoAgencyTitle>
           <NoAgencyDescription>
             To submit content, you need to be part of an agency or brand. 
-            Join an agency to start collaborating and submitting your amazing content!
+            Join an agency to start collaborating and submitting your content.
           </NoAgencyDescription>
           <JoinAgencyButton onClick={() => {/* TODO: Navigate to agency joining */}}>
             Find Agencies to Join
@@ -235,11 +233,11 @@ export const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
 
   return (
     <FormCard className="slide-in">
-      <FormTitle>Submit Your Content {getFormEmoji()}</FormTitle>
+      <FormTitle>{getFormTitle()}</FormTitle>
       
       {showSuccess && (
         <SuccessMessage className="fade-in">
-          🎉 Content submitted successfully! We'll review it shortly.
+          Content submitted successfully! We'll review it shortly.
         </SuccessMessage>
       )}
 
@@ -247,7 +245,7 @@ export const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
       {corporation && (
         <InputGroup>
           <Label>
-            🏢 Submitting for Agency
+            Submitting for Agency
           </Label>
           <Select
             value={user.corporationId || ''}
@@ -258,9 +256,9 @@ export const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
             </option>
           </Select>
           <div style={{ 
-            fontSize: theme.typography.fontSize.sm,
-            color: theme.colors.neutral[600],
-            marginTop: theme.spacing[1]
+            fontSize: professionalTheme.typography.fontSize.sm,
+            color: professionalTheme.colors.gray[600],
+            marginTop: professionalTheme.spacing[2]
           }}>
             Submitting content on behalf of {corporation.displayName}
           </div>
@@ -270,7 +268,7 @@ export const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
       <Form onSubmit={handleSubmit}>
         <InputGroup>
           <Label htmlFor="tiktokUrl">
-            🎵 TikTok URL (optional)
+            TikTok URL (optional)
           </Label>
           <Input
             id="tiktokUrl"
@@ -282,9 +280,9 @@ export const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
           />
           {formData.tiktokUrl && !isValidTikTokUrl(formData.tiktokUrl) && (
             <div style={{ 
-              color: theme.colors.error.main, 
-              fontSize: theme.typography.fontSize.sm,
-              marginTop: theme.spacing[1]
+              color: professionalTheme.colors.error[700], 
+              fontSize: professionalTheme.typography.fontSize.sm,
+              marginTop: professionalTheme.spacing[1]
             }}>
               Please enter a valid TikTok URL
             </div>
@@ -293,7 +291,7 @@ export const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
 
         <InputGroup>
           <Label htmlFor="instagramUrl">
-            📸 Instagram URL (optional)
+            Instagram URL (optional)
           </Label>
           <Input
             id="instagramUrl"
@@ -305,9 +303,9 @@ export const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
           />
           {formData.instagramUrl && !isValidInstagramUrl(formData.instagramUrl) && (
             <div style={{ 
-              color: theme.colors.error.main, 
-              fontSize: theme.typography.fontSize.sm,
-              marginTop: theme.spacing[1]
+              color: professionalTheme.colors.error[700], 
+              fontSize: professionalTheme.typography.fontSize.sm,
+              marginTop: professionalTheme.spacing[1]
             }}>
               Please enter a valid Instagram URL
             </div>
@@ -316,10 +314,10 @@ export const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
 
         {!hasAtLeastOneUrl() && (formData.tiktokUrl !== '' || formData.instagramUrl !== '') && (
           <div style={{ 
-            color: theme.colors.error.main, 
-            fontSize: theme.typography.fontSize.sm,
+            color: professionalTheme.colors.error[700], 
+            fontSize: professionalTheme.typography.fontSize.sm,
             textAlign: 'center',
-            marginBottom: theme.spacing[2]
+            marginBottom: professionalTheme.spacing[2]
           }}>
             Please provide at least one valid URL (TikTok or Instagram)
           </div>
@@ -332,11 +330,11 @@ export const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
         >
           {isSubmitting ? (
             <>
-              <LoadingSpinner size="sm" color={theme.colors.neutral[0]} />
+              <LoadingSpinner size="sm" color={professionalTheme.colors.white} />
               Submitting...
             </>
           ) : (
-            `Submit ${hasAtLeastOneUrl() ? 'Content' : 'Videos'} 🚀`
+            `Submit ${hasAtLeastOneUrl() ? 'Content' : 'Content'}`
           )}
         </SubmitButton>
       </Form>
