@@ -9,6 +9,7 @@ import { professionalTheme } from '../../styles/professionalTheme';
 import { Card, Button, Badge } from '../../styles/ProfessionalStyles';
 import { CreatorUser, VideoSubmission, SubmissionFormData } from '../../types';
 import { FirebaseSubmissionManager } from '../../firebase/FirebaseSubmissionManager';
+import { FirebaseProfileManager } from '../../firebase/FirebaseProfileManager';
 import { VideoSubmissionForm } from './VideoSubmissionForm';
 import { 
   Upload, 
@@ -23,7 +24,21 @@ import {
   LogOut,
   Plus,
   Eye,
-  Download
+  Download,
+  Settings,
+  Edit3,
+  Camera,
+  Instagram,
+  Music,
+  Sparkles,
+  BarChart3,
+  Award,
+  Zap,
+  Star,
+  Heart,
+  Users,
+  Globe,
+  Palette
 } from 'lucide-react';
 
 interface CreatorDashboardProps {
@@ -33,13 +48,22 @@ interface CreatorDashboardProps {
 
 const DashboardLayout = styled.div`
   min-height: 100vh;
-  background: ${professionalTheme.colors.gray[25]};
+  background: linear-gradient(135deg, 
+    ${professionalTheme.colors.gray[25]} 0%,
+    ${professionalTheme.colors.primary[25]} 50%,
+    ${professionalTheme.colors.gray[50]} 100%
+  );
 `;
 
 const DashboardHeader = styled.header`
-  background: ${professionalTheme.colors.white};
+  background: linear-gradient(135deg, 
+    ${professionalTheme.colors.white} 0%,
+    rgba(255, 255, 255, 0.98) 100%
+  );
+  backdrop-filter: blur(10px);
   border-bottom: 1px solid ${professionalTheme.borders.color.light};
   padding: ${professionalTheme.spacing[4]} ${professionalTheme.spacing[6]};
+  box-shadow: ${professionalTheme.shadows.sm};
 `;
 
 const HeaderContent = styled.div`
@@ -67,12 +91,16 @@ const Logo = styled.div`
 const LogoIcon = styled.div`
   width: 32px;
   height: 32px;
-  background: ${professionalTheme.colors.primary[500]};
+  background: linear-gradient(135deg, 
+    ${professionalTheme.colors.primary[500]} 0%,
+    ${professionalTheme.colors.primary[600]} 100%
+  );
   border-radius: ${professionalTheme.borderRadius.lg};
   display: flex;
   align-items: center;
   justify-content: center;
   color: ${professionalTheme.colors.white};
+  box-shadow: ${professionalTheme.shadows.sm};
 `;
 
 const LogoText = styled.h1`
@@ -175,34 +203,66 @@ const StatsGrid = styled.div`
   margin-bottom: ${professionalTheme.spacing[6]};
 `;
 
-const StatCard = styled(Card)`
+const StatCard = styled(Card)<{ gradient: string }>`
   padding: ${professionalTheme.spacing[6]};
   text-align: center;
+  background: ${props => props.gradient};
+  border: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: ${professionalTheme.shadows.xl};
+    
+    &::before {
+      opacity: 1;
+    }
+  }
 `;
 
 const StatIcon = styled.div<{ color: string }>`
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   margin: 0 auto ${professionalTheme.spacing[4]};
-  background: ${props => props.color}20;
-  color: ${props => props.color};
-  border-radius: ${professionalTheme.borderRadius.lg};
+  background: rgba(255, 255, 255, 0.2);
+  color: ${professionalTheme.colors.white};
+  border-radius: ${professionalTheme.borderRadius.xl};
   display: flex;
   align-items: center;
   justify-content: center;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: ${professionalTheme.shadows.md};
 `;
 
 const StatValue = styled.div`
-  font-size: ${professionalTheme.typography.fontSize['2xl']};
+  font-size: ${professionalTheme.typography.fontSize['3xl']};
   font-weight: ${professionalTheme.typography.fontWeight.bold};
-  color: ${professionalTheme.colors.gray[900]};
+  color: ${professionalTheme.colors.white};
   margin-bottom: ${professionalTheme.spacing[1]};
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 `;
 
 const StatLabel = styled.div`
   font-size: ${professionalTheme.typography.fontSize.sm};
-  color: ${professionalTheme.colors.gray[600]};
+  color: rgba(255, 255, 255, 0.9);
   font-weight: ${professionalTheme.typography.fontWeight.medium};
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 `;
 
 const SectionTitle = styled.h3`
@@ -361,14 +421,174 @@ const ErrorMessage = styled.div`
   font-size: ${professionalTheme.typography.fontSize.sm};
 `;
 
+// Profile Edit Modal Styles
+const ProfileEditModal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: ${professionalTheme.spacing[4]};
+`;
+
+const ProfileEditOverlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+`;
+
+const ProfileEditContent = styled.div`
+  position: relative;
+  background: ${professionalTheme.colors.white};
+  border-radius: ${professionalTheme.borderRadius.xl};
+  box-shadow: ${professionalTheme.shadows.xl};
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+`;
+
+const ProfileEditHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: ${professionalTheme.spacing[6]};
+  border-bottom: 1px solid ${professionalTheme.colors.gray[200]};
+  
+  h2 {
+    font-size: ${professionalTheme.typography.fontSize.xl};
+    font-weight: ${professionalTheme.typography.fontWeight.semibold};
+    color: ${professionalTheme.colors.gray[900]};
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: ${professionalTheme.spacing[2]};
+  }
+`;
+
+const ProfileEditForm = styled.form`
+  padding: ${professionalTheme.spacing[6]};
+`;
+
+const FormGroup = styled.div`
+  margin-bottom: ${professionalTheme.spacing[4]};
+`;
+
+const Label = styled.label`
+  display: block;
+  font-size: ${professionalTheme.typography.fontSize.sm};
+  font-weight: ${professionalTheme.typography.fontWeight.medium};
+  color: ${professionalTheme.colors.gray[700]};
+  margin-bottom: ${professionalTheme.spacing[2]};
+`;
+
+const Input = styled.input`
+  width: 100%;
+  padding: ${professionalTheme.spacing[3]};
+  border: 1px solid ${professionalTheme.colors.gray[300]};
+  border-radius: ${professionalTheme.borderRadius.md};
+  font-size: ${professionalTheme.typography.fontSize.sm};
+  transition: all 0.2s ease;
+  
+  &:focus {
+    outline: none;
+    border-color: ${professionalTheme.colors.primary[500]};
+    box-shadow: 0 0 0 3px ${professionalTheme.colors.primary[100]};
+  }
+  
+  &:disabled {
+    background-color: ${professionalTheme.colors.gray[50]};
+    color: ${professionalTheme.colors.gray[500]};
+    cursor: not-allowed;
+  }
+`;
+
+const ProfilePictureSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${professionalTheme.spacing[4]};
+  margin-bottom: ${professionalTheme.spacing[6]};
+  padding: ${professionalTheme.spacing[4]};
+  background: ${professionalTheme.colors.gray[50]};
+  border-radius: ${professionalTheme.borderRadius.lg};
+`;
+
+const ProfilePicturePreview = styled.div`
+  width: 80px;
+  height: 80px;
+  border-radius: ${professionalTheme.borderRadius.full};
+  background: linear-gradient(135deg, 
+    ${professionalTheme.colors.primary[400]} 0%,
+    ${professionalTheme.colors.primary[600]} 100%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: ${professionalTheme.colors.white};
+  font-size: ${professionalTheme.typography.fontSize.xl};
+  font-weight: ${professionalTheme.typography.fontWeight.bold};
+  position: relative;
+  overflow: hidden;
+`;
+
+const ProfilePictureUpload = styled.div`
+  flex: 1;
+`;
+
+const UploadButton = styled.label`
+  display: inline-flex;
+  align-items: center;
+  gap: ${professionalTheme.spacing[2]};
+  padding: ${professionalTheme.spacing[2]} ${professionalTheme.spacing[4]};
+  background: ${professionalTheme.colors.primary[500]};
+  color: ${professionalTheme.colors.white};
+  border-radius: ${professionalTheme.borderRadius.md};
+  font-size: ${professionalTheme.typography.fontSize.sm};
+  font-weight: ${professionalTheme.typography.fontWeight.medium};
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${professionalTheme.colors.primary[600]};
+  }
+  
+  input {
+    display: none;
+  }
+`;
+
+const FormActions = styled.div`
+  display: flex;
+  gap: ${professionalTheme.spacing[3]};
+  padding-top: ${professionalTheme.spacing[4]};
+  border-top: 1px solid ${professionalTheme.colors.gray[200]};
+`;
+
 export const CreatorDashboard: React.FC<CreatorDashboardProps> = ({ user, onLogout }) => {
   const [submissions, setSubmissions] = useState<VideoSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [showSubmissionForm, setShowSubmissionForm] = useState(false);
+  const [showProfileEdit, setShowProfileEdit] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [profileData, setProfileData] = useState({
+    username: user.username,
+    instagramHandle: user.socialHandles?.instagram || '',
+    tiktokHandle: user.socialHandles?.tiktok || '',
+    profilePicture: user.profilePicture || null
+  });
 
   const submissionManager = FirebaseSubmissionManager.getInstance();
+  const profileManager = FirebaseProfileManager.getInstance();
 
   useEffect(() => {
     const loadSubmissions = async () => {
@@ -439,6 +659,59 @@ export const CreatorDashboard: React.FC<CreatorDashboardProps> = ({ user, onLogo
     }
   };
 
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setIsSavingProfile(true);
+      setError(null);
+      
+      // Update profile via Firebase
+      await profileManager.updateProfile(user.id, {
+        username: profileData.username,
+        instagramHandle: profileData.instagramHandle,
+        tiktokHandle: profileData.tiktokHandle,
+        profilePicture: profileData.profilePicture
+      });
+      
+      setShowProfileEdit(false);
+      
+      // Show success message (could be improved with a toast notification)
+      console.log('✅ Profile updated successfully!');
+    } catch (error) {
+      console.error('Profile update failed:', error);
+      setError(error instanceof Error ? error.message : 'Profile update failed');
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
+
+  const handleProfileInputChange = (field: string, value: string) => {
+    setProfileData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleProfilePictureUpload = async (file: File) => {
+    try {
+      setError(null);
+      
+      // Upload to Firebase Storage
+      const downloadURL = await profileManager.uploadProfilePicture(user.id, file);
+      
+      // Update local state
+      setProfileData(prev => ({
+        ...prev,
+        profilePicture: downloadURL
+      }));
+      
+      console.log('✅ Profile picture uploaded successfully!');
+    } catch (error) {
+      console.error('Profile picture upload failed:', error);
+      setError(error instanceof Error ? error.message : 'Profile picture upload failed');
+    }
+  };
+
   const stats = {
     totalSubmissions: submissions.length,
     approvedSubmissions: submissions.filter(s => s.status === 'approved').length,
@@ -465,7 +738,11 @@ export const CreatorDashboard: React.FC<CreatorDashboardProps> = ({ user, onLogo
           </HeaderLeft>
 
           <HeaderActions>
-            <Button variant="primary" size="sm">
+            <Button variant="secondary" size="sm" onClick={() => setShowProfileEdit(true)}>
+              <Settings size={16} />
+              Profile
+            </Button>
+            <Button variant="primary" size="sm" onClick={() => setShowSubmissionForm(true)}>
               <Plus size={16} />
               New Submission
             </Button>
@@ -487,36 +764,36 @@ export const CreatorDashboard: React.FC<CreatorDashboardProps> = ({ user, onLogo
 
       <MainContent>
         <StatsGrid>
-          <StatCard>
+          <StatCard gradient={`linear-gradient(135deg, ${professionalTheme.colors.primary[500]} 0%, ${professionalTheme.colors.primary[600]} 100%)`}>
             <StatIcon color={professionalTheme.colors.primary[500]}>
-              <Video />
+              <Sparkles />
             </StatIcon>
             <StatValue>{stats.totalSubmissions}</StatValue>
-            <StatLabel>Total Submissions</StatLabel>
+            <StatLabel>Total Creations</StatLabel>
           </StatCard>
 
-          <StatCard>
+          <StatCard gradient={`linear-gradient(135deg, ${professionalTheme.colors.success[500]} 0%, ${professionalTheme.colors.success[600]} 100%)`}>
             <StatIcon color={professionalTheme.colors.success[500]}>
-              <CheckCircle />
+              <Award />
             </StatIcon>
             <StatValue>{stats.approvedSubmissions}</StatValue>
             <StatLabel>Approved</StatLabel>
           </StatCard>
 
-          <StatCard>
+          <StatCard gradient={`linear-gradient(135deg, ${professionalTheme.colors.warning[500]} 0%, ${professionalTheme.colors.warning[600]} 100%)`}>
             <StatIcon color={professionalTheme.colors.warning[500]}>
-              <Clock />
+              <Zap />
             </StatIcon>
             <StatValue>{stats.pendingSubmissions}</StatValue>
-            <StatLabel>Pending Review</StatLabel>
+            <StatLabel>In Review</StatLabel>
           </StatCard>
 
-          <StatCard>
+          <StatCard gradient={`linear-gradient(135deg, ${professionalTheme.colors.error[500]} 0%, ${professionalTheme.colors.error[600]} 100%)`}>
             <StatIcon color={professionalTheme.colors.error[500]}>
-              <XCircle />
+              <Heart />
             </StatIcon>
             <StatValue>{stats.rejectedSubmissions}</StatValue>
-            <StatLabel>Rejected</StatLabel>
+            <StatLabel>Needs Work</StatLabel>
           </StatCard>
         </StatsGrid>
 
@@ -566,27 +843,35 @@ export const CreatorDashboard: React.FC<CreatorDashboardProps> = ({ user, onLogo
               <SectionTitle>Quick Actions</SectionTitle>
               <ActionButton variant="primary" onClick={() => setShowSubmissionForm(true)}>
                 <Upload size={16} />
-                Upload Video
+                Create Content
               </ActionButton>
               <ActionButton variant="secondary">
-                <TrendingUp size={16} />
-                View Analytics
+                <BarChart3 size={16} />
+                Analytics
               </ActionButton>
               <ActionButton variant="secondary">
-                <Download size={16} />
-                Download Assets
+                <Palette size={16} />
+                Brand Kit
+              </ActionButton>
+              <ActionButton variant="secondary" onClick={() => setShowProfileEdit(true)}>
+                <Settings size={16} />
+                Settings
               </ActionButton>
             </QuickActionsCard>
 
             {user.corporationId && (
               <AgencyCard>
                 <AgencyIcon>
-                  <Building2 size={24} />
+                  <Users size={24} />
                 </AgencyIcon>
-                <AgencyName>Your Agency</AgencyName>
+                <AgencyName>Creative Team</AgencyName>
                 <AgencyDescription>
-                  You're part of a creative team working together to produce amazing content.
+                  You're part of an amazing creative collective. Collaborate and create together!
                 </AgencyDescription>
+                <Button variant="ghost" size="sm" style={{ marginTop: professionalTheme.spacing[3] }}>
+                  <Globe size={14} />
+                  View Team
+                </Button>
               </AgencyCard>
             )}
           </SideColumn>
@@ -613,6 +898,116 @@ export const CreatorDashboard: React.FC<CreatorDashboardProps> = ({ user, onLogo
             />
           </SubmissionFormContent>
         </SubmissionFormModal>
+      )}
+
+      {showProfileEdit && (
+        <ProfileEditModal>
+          <ProfileEditOverlay onClick={() => setShowProfileEdit(false)} />
+          <ProfileEditContent>
+            <ProfileEditHeader>
+              <h2>
+                <Edit3 size={20} />
+                Edit Profile
+              </h2>
+              <Button variant="ghost" onClick={() => setShowProfileEdit(false)}>
+                ×
+              </Button>
+            </ProfileEditHeader>
+            
+            <ProfileEditForm onSubmit={handleSaveProfile}>
+              <ProfilePictureSection>
+                <ProfilePicturePreview>
+                  {profileData.profilePicture ? (
+                    <img 
+                      src={profileData.profilePicture} 
+                      alt="Profile" 
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  ) : (
+                    getUserInitials(profileData.username)
+                  )}
+                </ProfilePicturePreview>
+                <ProfilePictureUpload>
+                  <p style={{ 
+                    fontSize: professionalTheme.typography.fontSize.sm, 
+                    color: professionalTheme.colors.gray[600],
+                    marginBottom: professionalTheme.spacing[2]
+                  }}>
+                    Update your profile picture
+                  </p>
+                  <UploadButton>
+                    <Camera size={16} />
+                    Choose Photo
+                    <input 
+                      type="file" 
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          handleProfilePictureUpload(file);
+                        }
+                      }}
+                    />
+                  </UploadButton>
+                </ProfilePictureUpload>
+              </ProfilePictureSection>
+
+              <FormGroup>
+                <Label>Username</Label>
+                <Input
+                  type="text"
+                  value={profileData.username}
+                  onChange={(e) => handleProfileInputChange('username', e.target.value)}
+                  placeholder="Enter your username"
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <Label>
+                  <Instagram size={16} style={{ display: 'inline', marginRight: '8px' }} />
+                  Instagram Handle
+                </Label>
+                <Input
+                  type="text"
+                  value={profileData.instagramHandle}
+                  onChange={(e) => handleProfileInputChange('instagramHandle', e.target.value)}
+                  placeholder="@yourusername"
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <Label>
+                  <Music size={16} style={{ display: 'inline', marginRight: '8px' }} />
+                  TikTok Handle
+                </Label>
+                <Input
+                  type="text"
+                  value={profileData.tiktokHandle}
+                  onChange={(e) => handleProfileInputChange('tiktokHandle', e.target.value)}
+                  placeholder="@yourusername"
+                />
+              </FormGroup>
+
+              <FormActions>
+                <Button 
+                  type="button" 
+                  variant="secondary" 
+                  onClick={() => setShowProfileEdit(false)}
+                  disabled={isSavingProfile}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  variant="primary"
+                  disabled={isSavingProfile}
+                >
+                  {isSavingProfile ? 'Saving...' : 'Save Changes'}
+                </Button>
+              </FormActions>
+            </ProfileEditForm>
+          </ProfileEditContent>
+        </ProfileEditModal>
       )}
     </DashboardLayout>
   );
