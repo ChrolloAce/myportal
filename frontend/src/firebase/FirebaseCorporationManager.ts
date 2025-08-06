@@ -48,11 +48,15 @@ export class FirebaseCorporationManager {
 
       const corporationData: Omit<Corporation, 'id'> = {
         name: corporationName.toLowerCase().replace(/[^a-z0-9]/g, ''),
-        displayName: data.displayName,
-        description: data.description,
-        industry: data.industry,
-        socialMedia: data.socialMedia,
-        settings: data.settings,
+        displayName: data.displayName || '',
+        description: data.description || '',
+        industry: data.industry || '',
+        socialMedia: data.socialMedia || {},
+        settings: {
+          allowPublicJoin: data.settings?.allowPublicJoin ?? false,
+          requireApproval: data.settings?.requireApproval ?? true,
+          maxCreators: data.settings?.maxCreators ?? 50
+        },
         ownerId,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),

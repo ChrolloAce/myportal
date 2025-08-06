@@ -194,7 +194,20 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({
   onCancel
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [formData, setFormData] = useState<any>({});
+  const [formData, setFormData] = useState<any>({
+    corporationData: {
+      corporationName: '',
+      displayName: '',
+      industry: '',
+      description: '',
+      socialMedia: {},
+      settings: {
+        allowPublicJoin: false,
+        requireApproval: true,
+        maxCreators: 50
+      }
+    }
+  });
 
   const totalSteps = userRole === UserRole.ADMIN ? 3 : 2;
   const progress = ((currentStep + 1) / totalSteps) * 100;
