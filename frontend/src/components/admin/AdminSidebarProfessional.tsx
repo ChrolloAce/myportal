@@ -8,15 +8,15 @@ import styled from 'styled-components';
 import { professionalTheme } from '../../styles/professionalTheme';
 import { Badge } from '../../styles/ProfessionalStyles';
 import { 
-  LayoutDashboard, 
-  FileText, 
-  BarChart3, 
   Users, 
-  UserPlus,
   Settings,
   LogOut,
-  Building2,
-  Crown
+  Crown,
+  Sparkles,
+  Award,
+  Mail,
+  Shield,
+  TrendingUp
 } from 'lucide-react';
 import { AdminUser } from '../../types';
 
@@ -47,14 +47,18 @@ const Logo = styled.div`
 `;
 
 const LogoIcon = styled.div`
-  width: 32px;
-  height: 32px;
-  background: ${professionalTheme.colors.primary[500]};
-  border-radius: ${professionalTheme.borderRadius.lg};
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, 
+    ${professionalTheme.colors.primary[500]} 0%,
+    ${professionalTheme.colors.primary[600]} 100%
+  );
+  border-radius: ${professionalTheme.borderRadius.xl};
   display: flex;
   align-items: center;
   justify-content: center;
   color: ${professionalTheme.colors.white};
+  box-shadow: ${professionalTheme.shadows.md};
 `;
 
 const LogoText = styled.h1`
@@ -235,17 +239,17 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
     {
       section: 'Overview',
       items: [
-        { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
-        { id: 'submissions', label: 'Submissions', icon: FileText },
-        { id: 'statistics', label: 'Analytics', icon: BarChart3 },
+        { id: 'overview', label: 'Dashboard', icon: Sparkles },
+        { id: 'submissions', label: 'Content Hub', icon: Award },
+        { id: 'statistics', label: 'Analytics', icon: TrendingUp },
       ]
     },
     {
       section: 'Management',
       items: [
         { id: 'members', label: 'Team Members', icon: Users },
-        { id: 'invites', label: 'Invitations', icon: UserPlus },
-        { id: 'users', label: 'User Management', icon: Users },
+        { id: 'invites', label: 'Invitations', icon: Mail },
+        { id: 'users', label: 'User Management', icon: Shield },
       ]
     },
     {
@@ -270,9 +274,9 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       <SidebarHeader>
         <Logo>
           <LogoIcon>
-            <Building2 size={20} />
+            <Crown size={24} />
           </LogoIcon>
-          <LogoText>Portal</LogoText>
+          <LogoText>Admin Portal</LogoText>
         </Logo>
 
         <UserInfo>
