@@ -16,6 +16,7 @@ import { UserManagement } from './UserManagementProfessional';
 import { AdminStatistics } from './AdminStatisticsProfessional';
 import { CorporationMembers } from './CorporationMembers';
 import { InviteManagement } from './InviteManagementProfessional';
+import { AgencySettings } from './AgencySettings';
 import { 
   Users,
   TrendingUp,
@@ -346,12 +347,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
           <InviteManagement user={user} />
         ) : null;
       case 'settings':
-        return (
-          <Card>
-            <h3>Settings</h3>
-            <p>Organization settings coming soon...</p>
-          </Card>
-        );
+        return <AgencySettings user={user} />;
       default:
         return null;
     }

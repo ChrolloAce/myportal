@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { professionalTheme } from '../../styles/professionalTheme';
-import { Container, Card } from '../../styles/ProfessionalStyles';
+import { Container } from '../../styles/ProfessionalStyles';
 import { VideoSubmissionForm } from './VideoSubmissionForm';
 import { SubmissionHistory } from './SubmissionHistory';
 import { DashboardHeader } from './DashboardHeader';
@@ -28,44 +28,7 @@ const MainContent = styled.main`
   padding: ${professionalTheme.spacing[8]} 0;
 `;
 
-const StatsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: ${professionalTheme.spacing[6]};
-  margin-bottom: ${professionalTheme.spacing[8]};
-`;
 
-const StatCard = styled(Card)`
-  padding: ${professionalTheme.spacing[6]};
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-  color: ${professionalTheme.colors.white};
-  border: none;
-  
-  &:nth-child(2) {
-    background: linear-gradient(135deg, #10b981 0%, #047857 100%);
-  }
-  
-  &:nth-child(3) {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  }
-`;
-
-const StatValue = styled.div`
-  font-size: ${professionalTheme.typography.fontSize['3xl']};
-  font-weight: ${professionalTheme.typography.fontWeight.bold};
-  margin-bottom: ${professionalTheme.spacing[2]};
-`;
-
-const StatLabel = styled.div`
-  font-size: ${professionalTheme.typography.fontSize.sm};
-  opacity: 0.9;
-  margin-bottom: ${professionalTheme.spacing[1]};
-`;
-
-const StatChange = styled.div`
-  font-size: ${professionalTheme.typography.fontSize.xs};
-  opacity: 0.8;
-`;
 
 const DashboardGrid = styled.div`
   display: grid;
@@ -174,29 +137,9 @@ export const CreatorDashboard: React.FC<CreatorDashboardProps> = ({
           <WelcomeSection className="fade-in">
             <WelcomeTitle>Welcome back, {user.username}</WelcomeTitle>
             <WelcomeMessage>
-              Track performance metrics and analyze trends across your content submissions.
+              Ready to share your latest creation? Submit your video below and track its progress.
             </WelcomeMessage>
           </WelcomeSection>
-
-          <StatsGrid>
-            <StatCard>
-              <StatValue>12</StatValue>
-              <StatLabel>Total Submissions</StatLabel>
-              <StatChange>+2.5% vs last month</StatChange>
-            </StatCard>
-            
-            <StatCard>
-              <StatValue>8</StatValue>
-              <StatLabel>Approved Content</StatLabel>
-              <StatChange>+18.2% vs last month</StatChange>
-            </StatCard>
-            
-            <StatCard>
-              <StatValue>67%</StatValue>
-              <StatLabel>Approval Rate</StatLabel>
-              <StatChange>+12% vs last month</StatChange>
-            </StatCard>
-          </StatsGrid>
 
           {error && (
             <ErrorMessage className="slide-in">

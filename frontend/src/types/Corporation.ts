@@ -12,6 +12,11 @@ export interface Corporation {
   website?: string;
   logo?: string;
   
+  // Contact information
+  email?: string;
+  phone?: string;
+  address?: string;
+  
   // Social media info
   socialMedia?: {
     instagram?: string;
@@ -21,10 +26,12 @@ export interface Corporation {
   };
   
   // Settings
-  settings: {
+  settings?: {
     allowPublicJoin: boolean;
     requireApproval: boolean;
     maxCreators?: number;
+    emailNotifications?: boolean;
+    weeklyReports?: boolean;
   };
   
   // Metadata
@@ -87,6 +94,8 @@ export interface CorporationOnboarding {
     allowPublicJoin: boolean;
     requireApproval: boolean;
     maxCreators?: number;
+    emailNotifications?: boolean;
+    weeklyReports?: boolean;
   };
   
   // Step 4: First Invite (optional)
