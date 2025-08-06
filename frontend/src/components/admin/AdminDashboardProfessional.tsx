@@ -9,7 +9,7 @@ import { professionalTheme } from '../../styles/professionalTheme';
 import { Card } from '../../styles/ProfessionalStyles';
 import { FirebaseSubmissionManager } from '../../firebase/FirebaseSubmissionManager';
 import { AdminUser, VideoSubmission, SubmissionStats } from '../../types';
-import { AdminSidebar } from './AdminSidebar';
+import { AdminSidebar } from './AdminSidebarProfessional';
 import { SubmissionManagement } from './SubmissionManagement';
 import { AdminOverview } from './AdminOverview';
 import { UserManagement } from './UserManagement';
@@ -386,7 +386,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
           user={user}
           currentView={currentView}
           onViewChange={(view) => {
-            setCurrentView(view);
+            setCurrentView(view as AdminView);
             setSidebarOpen(false);
           }}
           onLogout={onLogout}
