@@ -39,8 +39,15 @@ export class FirebaseCorporationManager {
   // Create a new corporation
   async createCorporation(ownerId: string, data: CorporationOnboarding): Promise<Corporation> {
     try {
+      // Use corporationName if provided, otherwise fall back to displayName
+      const corporationName = data.corporationName || data.displayName;
+      
+      if (!corporationName) {
+        throw new Error('Corporation name is required');
+      }
+
       const corporationData: Omit<Corporation, 'id'> = {
-        name: data.corporationName.toLowerCase().replace(/[^a-z0-9]/g, ''),
+        name: corporationName.toLowerCase().replace(/[^a-z0-9]/g, ''),
         displayName: data.displayName,
         description: data.description,
         industry: data.industry,

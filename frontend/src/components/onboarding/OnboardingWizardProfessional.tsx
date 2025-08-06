@@ -323,6 +323,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({
                 value={formData.corporationData?.displayName || ''}
                 onChange={(e) => updateFormData('corporationData', {
                   ...formData.corporationData,
+                  corporationName: e.target.value,
                   displayName: e.target.value
                 })}
               />
