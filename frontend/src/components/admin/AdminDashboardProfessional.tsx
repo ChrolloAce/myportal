@@ -13,9 +13,9 @@ import { AdminSidebar } from './AdminSidebarProfessional';
 import { SubmissionManagement } from './SubmissionManagement';
 import { AdminOverview } from './AdminOverview';
 import { UserManagement } from './UserManagement';
-import { AdminStatistics } from './AdminStatistics';
+import { AdminStatistics } from './AdminStatisticsProfessional';
 import { CorporationMembers } from './CorporationMembers';
-import { InviteManagement } from './InviteManagement';
+import { InviteManagement } from './InviteManagementProfessional';
 import { 
   Users,
   TrendingUp,
