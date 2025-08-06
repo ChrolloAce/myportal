@@ -84,8 +84,14 @@ export class FirebaseOnboardingManager {
 
       // Update user document in Firestore
       const userRef = doc(db, 'users', userId);
+      
+      // Filter out undefined values to prevent Firestore errors
+      const updateData = Object.fromEntries(
+        Object.entries(creatorData).filter(([_, value]) => value !== undefined)
+      );
+      
       await updateDoc(userRef, {
-        ...creatorData,
+        ...updateData,
         updatedAt: serverTimestamp()
       });
 
@@ -118,7 +124,7 @@ export class FirebaseOnboardingManager {
 
       // Prepare admin user data
       const adminData: Partial<AdminUser> = {
-        username: data.username,
+        username: data.username || '',
         profilePicture: data.profilePicture,
         corporationId: corporation.id,
         corporationRole: 'owner',
@@ -126,14 +132,20 @@ export class FirebaseOnboardingManager {
         onboardingSteps: {
           corporationSetup: true,
           profileSetup: true,
-          inviteSetup: data.corporationData.createFirstInvite
+          inviteSetup: data.corporationData.createFirstInvite || false
         }
       };
 
       // Update user document in Firestore
       const userRef = doc(db, 'users', userId);
+      
+      // Filter out undefined values to prevent Firestore errors
+      const updateData = Object.fromEntries(
+        Object.entries(adminData).filter(([_, value]) => value !== undefined)
+      );
+      
       await updateDoc(userRef, {
-        ...adminData,
+        ...updateData,
         updatedAt: serverTimestamp()
       });
 

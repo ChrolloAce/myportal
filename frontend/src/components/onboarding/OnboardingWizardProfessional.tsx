@@ -274,8 +274,8 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({
               <Input
                 type="text"
                 placeholder="Enter your full name"
-                value={formData.name || ''}
-                onChange={(e) => updateFormData('name', e.target.value)}
+                value={userRole === UserRole.ADMIN ? (formData.username || '') : (formData.name || '')}
+                onChange={(e) => updateFormData(userRole === UserRole.ADMIN ? 'username' : 'name', e.target.value)}
               />
             </FormGroup>
 
