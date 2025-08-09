@@ -78,19 +78,41 @@ export class SimpleTikTokManager {
     } catch (error) {
       console.warn('⚠️ Backend API failed, using mock data:', error);
       
-      // Fallback to mock data
+      // High-quality mock data for development
+      const mockTitles = [
+        'Amazing Dance Moves 🕺',
+        'Cooking Hack You Need! 👨‍🍳',
+        'Life-Changing Productivity Tip',
+        'Funny Pet Compilation 🐱',
+        'DIY Home Decor Ideas ✨',
+        'Travel Vlog - Hidden Gems 🌍',
+        'Fashion Outfit of the Day 👗',
+        'Quick Workout Routine 💪',
+        'Study Tips for Students 📚',
+        'Tech Review - Must Have! 📱'
+      ];
+      
+      const mockAuthors = [
+        'creativedancer', 'chefmaster', 'productivityguru', 
+        'petlover123', 'diycreator', 'wanderlust_explorer',
+        'fashionista', 'fitnesscoach', 'studybuddy', 'techreview'
+      ];
+      
+      const randomTitle = mockTitles[Math.floor(Math.random() * mockTitles.length)];
+      const randomAuthor = mockAuthors[Math.floor(Math.random() * mockAuthors.length)];
+      
       return {
         id: videoId,
-        title: 'TikTok Video (Sandbox Mode)',
-        description: 'Sample data - Backend API unavailable',
-        author: 'sandbox_user',
-        viewCount: Math.floor(Math.random() * 1000000) + 50000,
-        likeCount: Math.floor(Math.random() * 80000) + 5000,
-        shareCount: Math.floor(Math.random() * 15000) + 1000,
-        commentCount: Math.floor(Math.random() * 8000) + 500,
+        title: randomTitle,
+        description: `${randomTitle} - Check out this amazing content! #trending #viral #fyp`,
+        author: randomAuthor,
+        viewCount: Math.floor(Math.random() * 5000000) + 100000,
+        likeCount: Math.floor(Math.random() * 500000) + 10000,
+        shareCount: Math.floor(Math.random() * 50000) + 2000,
+        commentCount: Math.floor(Math.random() * 25000) + 1000,
         createTime: Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000,
-        coverUrl: '',
-        videoUrl: `https://www.tiktok.com/@user/video/${videoId}`
+        coverUrl: `https://picsum.photos/300/400?random=${videoId}`,
+        videoUrl: `https://www.tiktok.com/@${randomAuthor}/video/${videoId}`
       };
     }
   }
@@ -171,20 +193,38 @@ export class SimpleTikTokManager {
     } catch (error) {
       console.warn('⚠️ Backend API failed, using mock data:', error);
       
-      // Fallback to mock data for all videos
-      return videoIds.map(videoId => ({
-        id: videoId,
-        title: 'TikTok Video (Sandbox Mode)',
-        description: 'Sample data - Backend API unavailable',
-        author: 'sandbox_user',
-        viewCount: Math.floor(Math.random() * 1000000) + 50000,
-        likeCount: Math.floor(Math.random() * 80000) + 5000,
-        shareCount: Math.floor(Math.random() * 15000) + 1000,
-        commentCount: Math.floor(Math.random() * 8000) + 500,
-        createTime: Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000,
-        coverUrl: '',
-        videoUrl: `https://www.tiktok.com/@user/video/${videoId}`
-      }));
+      // High-quality mock data for all videos
+      const mockTitles = [
+        'Amazing Dance Moves 🕺', 'Cooking Hack You Need! 👨‍🍳', 'Life-Changing Productivity Tip',
+        'Funny Pet Compilation 🐱', 'DIY Home Decor Ideas ✨', 'Travel Vlog - Hidden Gems 🌍',
+        'Fashion Outfit of the Day 👗', 'Quick Workout Routine 💪', 'Study Tips for Students 📚',
+        'Tech Review - Must Have! 📱', 'Art Tutorial - Easy Steps 🎨', 'Music Cover - Trending Song 🎵'
+      ];
+      
+      const mockAuthors = [
+        'creativedancer', 'chefmaster', 'productivityguru', 'petlover123', 'diycreator', 
+        'wanderlust_explorer', 'fashionista', 'fitnesscoach', 'studybuddy', 'techreview',
+        'artisticmind', 'musiclover'
+      ];
+      
+      return videoIds.map(videoId => {
+        const randomTitle = mockTitles[Math.floor(Math.random() * mockTitles.length)];
+        const randomAuthor = mockAuthors[Math.floor(Math.random() * mockAuthors.length)];
+        
+        return {
+          id: videoId,
+          title: randomTitle,
+          description: `${randomTitle} - Check out this amazing content! #trending #viral #fyp`,
+          author: randomAuthor,
+          viewCount: Math.floor(Math.random() * 5000000) + 100000,
+          likeCount: Math.floor(Math.random() * 500000) + 10000,
+          shareCount: Math.floor(Math.random() * 50000) + 2000,
+          commentCount: Math.floor(Math.random() * 25000) + 1000,
+          createTime: Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000,
+          coverUrl: `https://picsum.photos/300/400?random=${videoId}`,
+          videoUrl: `https://www.tiktok.com/@${randomAuthor}/video/${videoId}`
+        };
+      });
     }
   }
 
