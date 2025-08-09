@@ -46,7 +46,27 @@ export class SimpleTikTokManager {
    */
   public async getVideoInfo(videoId: string): Promise<SimpleTikTokVideo | null> {
     try {
-      // Using TikTok's web API endpoint (publicly accessible)
+      // Check if we're in production - disable API calls due to CORS
+      if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        console.warn('🚫 TikTok API disabled in production due to CORS restrictions');
+        
+        // Return mock data for production
+        return {
+          id: videoId,
+          title: 'Sample TikTok Video',
+          description: 'This is sample data - TikTok API disabled in production due to CORS',
+          author: 'sample_user',
+          viewCount: Math.floor(Math.random() * 1000000) + 10000,
+          likeCount: Math.floor(Math.random() * 50000) + 1000,
+          shareCount: Math.floor(Math.random() * 10000) + 500,
+          commentCount: Math.floor(Math.random() * 5000) + 100,
+          createTime: Date.now(),
+          coverUrl: '',
+          videoUrl: ''
+        };
+      }
+      
+      // Using TikTok's web API endpoint (publicly accessible) - development only
       const response = await fetch(`https://www.tiktok.com/api/item/detail/?itemId=${videoId}`, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'

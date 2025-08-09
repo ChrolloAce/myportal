@@ -8,6 +8,8 @@ import styled from 'styled-components';
 import { professionalTheme } from '../../styles/professionalTheme';
 import { Card, Button } from '../../styles/ProfessionalStyles';
 import { FirebaseSubmissionManager } from '../../firebase/FirebaseSubmissionManager';
+import { FirebaseCorporationManager } from '../../firebase/FirebaseCorporationManager';
+import { FirebaseProfileManager } from '../../firebase/FirebaseProfileManager';
 import { AdminUser, CreatorUser, Platform, VideoSubmission } from '../../types';
 import { 
   Upload,
@@ -273,6 +275,8 @@ export const AdminVideoUpload: React.FC<AdminVideoUploadProps> = ({ user }) => {
   const [error, setError] = useState<string | null>(null);
 
   const submissionManager = FirebaseSubmissionManager.getInstance();
+  const corporationManager = FirebaseCorporationManager.getInstance();
+  const profileManager = FirebaseProfileManager.getInstance();
 
   useEffect(() => {
     loadCreators();
@@ -281,13 +285,45 @@ export const AdminVideoUpload: React.FC<AdminVideoUploadProps> = ({ user }) => {
 
   const loadCreators = async () => {
     try {
-      // In a real implementation, you'd fetch creators from your user management system
-      // For now, we'll use a placeholder
       console.log('Loading creators for corporation:', user.corporationId);
-      // TODO: Implement actual creator fetching
-      setCreators([]);
+      
+      if (!user.corporationId) {
+        console.log('No corporation ID found for user');
+        setCreators([]);
+        return;
+      }
+
+      // Get corporation members
+      const members = await corporationManager.getCorporationMembers(user.corporationId);
+      console.log('Found corporation members:', members.length);
+
+      // Filter for creators (not admins) and get their full profiles
+      const creatorMembers = members.filter(member => member.role === 'creator');
+      console.log('Creator members:', creatorMembers.length);
+
+      // Load full user profiles for each creator
+      const creatorProfiles: CreatorUser[] = [];
+      for (const member of creatorMembers) {
+        try {
+          const profile = await profileManager.getProfile(member.userId);
+          if (profile && profile.role === 'creator') {
+            creatorProfiles.push({
+              ...profile,
+              corporationId: user.corporationId,
+              corporationRole: member.role,
+              joinedCorporationAt: member.joinedAt
+            } as CreatorUser);
+          }
+        } catch (profileError) {
+          console.warn('Failed to load profile for creator:', member.userId, profileError);
+        }
+      }
+
+      console.log('Loaded creator profiles:', creatorProfiles.length);
+      setCreators(creatorProfiles);
     } catch (error) {
       console.error('Error loading creators:', error);
+      setCreators([]);
     }
   };
 
