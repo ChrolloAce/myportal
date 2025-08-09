@@ -11,6 +11,7 @@ import { CreatorUser, VideoSubmission, SubmissionFormData } from '../../types';
 import { FirebaseSubmissionManager } from '../../firebase/FirebaseSubmissionManager';
 import { FirebaseProfileManager } from '../../firebase/FirebaseProfileManager';
 import { VideoSubmissionForm } from './VideoSubmissionForm';
+import { AssignedVideos } from './AssignedVideos';
 import { 
   Upload, 
   Video, 
@@ -570,6 +571,7 @@ const FormActions = styled.div`
 
 export const CreatorDashboard: React.FC<CreatorDashboardProps> = ({ user, onLogout }) => {
   const [submissions, setSubmissions] = useState<VideoSubmission[]>([]);
+  const [assignedVideos, setAssignedVideos] = useState<VideoSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [showSubmissionForm, setShowSubmissionForm] = useState(false);
   const [showProfileEdit, setShowProfileEdit] = useState(false);
@@ -592,6 +594,15 @@ export const CreatorDashboard: React.FC<CreatorDashboardProps> = ({ user, onLogo
         setLoading(true);
         const submissionsResponse = await submissionManager.getCreatorSubmissions();
         setSubmissions(submissionsResponse.items);
+        
+        // Load assigned videos (admin uploads assigned to this creator)
+        const allSubmissions = await submissionManager.getSubmissions();
+        const assigned = allSubmissions.items.filter(submission => 
+          submission.creatorId === user.id && 
+          submission.isAdminUpload === true && 
+          submission.status === 'approved'
+        );
+        setAssignedVideos(assigned);
       } catch (error) {
         console.error('Failed to load submissions:', error);
       } finally {
@@ -831,6 +842,11 @@ export const CreatorDashboard: React.FC<CreatorDashboardProps> = ({ user, onLogo
                   ))}
                 </SubmissionsList>
               )}
+            </div>
+
+            {/* Assigned Videos Section */}
+            <div style={{ marginTop: professionalTheme.spacing[8] }}>
+              <AssignedVideos assignedVideos={assignedVideos} />
             </div>
           </MainColumn>
 

@@ -32,6 +32,9 @@ export interface VideoSubmission {
   // TikTok-specific fields
   tiktokVideoId?: string;
   tiktokAnalytics?: TikTokVideoMetrics;
+  // Admin upload fields
+  isAdminUpload?: boolean;
+  assignedByAdmin?: boolean;
 }
 
 export interface SubmissionFormData {

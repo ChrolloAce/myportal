@@ -15,6 +15,7 @@ import { AdminOverview } from './AdminOverviewProfessional';
 import { UserManagement } from './UserManagementProfessional';
 import { AdminStatistics } from './AdminStatisticsProfessional';
 import { SimpleTikTokAnalytics } from './SimpleTikTokAnalytics';
+import { AdminVideoUpload } from './AdminVideoUpload';
 import { CorporationMembers } from './CorporationMembers';
 import { InviteManagement } from './InviteManagementProfessional';
 import { AgencySettings } from './AgencySettings';
@@ -25,7 +26,7 @@ interface AdminDashboardProps {
   onLogout: () => void;
 }
 
-type AdminView = 'overview' | 'submissions' | 'statistics' | 'analytics' | 'users' | 'members' | 'invites' | 'settings';
+type AdminView = 'overview' | 'submissions' | 'upload' | 'statistics' | 'analytics' | 'users' | 'members' | 'invites' | 'settings';
 
 // Professional Dashboard Layout with Gradient
 const DashboardLayout = styled.div`
@@ -195,6 +196,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
           title: 'Submission Management',
           subtitle: 'Review, approve, and manage video submissions from your creators.'
         };
+      case 'upload':
+        return {
+          title: 'Upload Pre-Approved Videos',
+          subtitle: 'Upload videos and assign them directly to creators in your agency.'
+        };
       case 'statistics':
         return {
           title: 'Analytics & Statistics',
@@ -254,6 +260,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
             }}
           />
         );
+      case 'upload':
+        return <AdminVideoUpload user={user} />;
       case 'statistics':
         return <AdminStatistics stats={stats} submissions={submissions} />;
       case 'analytics':
