@@ -44,12 +44,12 @@ export class SimpleTikTokManager {
     try {
       console.log('🎵 Fetching TikTok data via backend API for video:', videoId);
       
-      // Use backend API to avoid CORS issues
-      const backendUrl = window.location.hostname === 'localhost' 
-        ? 'http://localhost:3001' 
-        : 'https://your-backend-domain.com'; // Update this for production
+      // Use Vercel API routes to avoid CORS issues
+      const apiUrl = window.location.hostname === 'localhost' 
+        ? 'http://localhost:3001/api' // Local backend during development
+        : '/api'; // Vercel serverless functions in production
       
-      const response = await fetch(`${backendUrl}/api/tiktok/video/${videoId}`, {
+      const response = await fetch(`${apiUrl}/tiktok/video/${videoId}`, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -157,12 +157,12 @@ export class SimpleTikTokManager {
     console.log('🎵 Fetching multiple TikTok videos via backend API:', videoIds.length);
     
     try {
-      // Use backend API to avoid CORS issues
-      const backendUrl = window.location.hostname === 'localhost' 
-        ? 'http://localhost:3001' 
-        : 'https://your-backend-domain.com'; // Update this for production
+      // Use Vercel API routes to avoid CORS issues
+      const apiUrl = window.location.hostname === 'localhost' 
+        ? 'http://localhost:3001/api' // Local backend during development
+        : '/api'; // Vercel serverless functions in production
       
-      const response = await fetch(`${backendUrl}/api/tiktok/multiple`, {
+      const response = await fetch(`${apiUrl}/tiktok/multiple`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
