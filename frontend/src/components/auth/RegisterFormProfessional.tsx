@@ -445,6 +445,17 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             Sign in
           </FooterLink>
         </FooterText>
+        
+        <FooterText style={{ marginTop: professionalTheme.spacing[4], fontSize: professionalTheme.typography.fontSize.sm }}>
+          By creating an account, you agree to our{' '}
+          <FooterLink as="a" href="/terms" target="_blank" rel="noopener noreferrer">
+            Terms of Service
+          </FooterLink>
+          {' '}and{' '}
+          <FooterLink as="a" href="/privacy" target="_blank" rel="noopener noreferrer">
+            Privacy Policy
+          </FooterLink>
+        </FooterText>
       </RegisterCard>
     </RegisterContainer>
   );

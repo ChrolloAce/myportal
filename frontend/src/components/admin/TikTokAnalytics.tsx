@@ -97,7 +97,7 @@ const VideoCard = styled(Card)<{ performance: 'viral' | 'high' | 'medium' | 'low
   position: relative;
   border-left: 4px solid ${props => {
     switch (props.performance) {
-      case 'viral': return professionalTheme.colors.purple[500];
+      case 'viral': return professionalTheme.colors.brand.purple;
       case 'high': return professionalTheme.colors.success[500];
       case 'medium': return professionalTheme.colors.warning[500];
       case 'low': return professionalTheme.colors.gray[400];
@@ -181,8 +181,8 @@ const PerformanceBadge = styled.div<{ performance: 'viral' | 'high' | 'medium' |
     switch (props.performance) {
       case 'viral':
         return `
-          background: ${professionalTheme.colors.purple[100]};
-          color: ${professionalTheme.colors.purple[700]};
+          background: ${professionalTheme.colors.primary[100]};
+          color: ${professionalTheme.colors.brand.purple};
         `;
       case 'high':
         return `

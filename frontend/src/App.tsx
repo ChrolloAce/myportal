@@ -17,6 +17,8 @@ import { CreatorDashboard } from './components/creator/CreatorDashboardProfessio
 import { AdminDashboard } from './components/admin/AdminDashboardProfessional';
 import { LoadingSpinner } from './components/shared/LoadingSpinner';
 import { InviteLanding } from './components/invite/InviteLanding';
+import { PrivacyPolicy } from './components/legal/PrivacyPolicy';
+import { TermsOfService } from './components/legal/TermsOfService';
 import { LoginCredentials, RegisterData, UserRole, CreatorUser, AdminUser, CreatorOnboardingData, AdminOnboardingData, CorporationOnboarding } from './types';
 
 type AppUser = CreatorUser | AdminUser;
@@ -393,6 +395,16 @@ const App: React.FC = () => {
                 <Navigate to={getDefaultRoute()} replace />
               )
             }
+          />
+          
+          <Route
+            path="/privacy"
+            element={<PrivacyPolicy />}
+          />
+          
+          <Route
+            path="/terms"
+            element={<TermsOfService />}
           />
           
           <Route

@@ -342,6 +342,17 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             Sign up for free
           </FooterLink>
         </FooterText>
+        
+        <FooterText style={{ marginTop: professionalTheme.spacing[4], fontSize: professionalTheme.typography.fontSize.sm }}>
+          By signing in, you agree to our{' '}
+          <FooterLink as="a" href="/terms" target="_blank" rel="noopener noreferrer">
+            Terms of Service
+          </FooterLink>
+          {' '}and{' '}
+          <FooterLink as="a" href="/privacy" target="_blank" rel="noopener noreferrer">
+            Privacy Policy
+          </FooterLink>
+        </FooterText>
       </LoginCard>
     </LoginContainer>
   );

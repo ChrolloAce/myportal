@@ -174,7 +174,7 @@ export function getPerformanceCategory(views: number, likes: number, shares: num
 /**
  * Sort TikTok analytics by performance metrics
  */
-export function sortByPerformance<T extends { metrics: { views: number; likes: number; shares: number } }>(
+export function sortByPerformance<T extends { metrics: { views: number; likes: number; shares: number; comments: number } }>(
   analytics: T[],
   sortBy: 'views' | 'likes' | 'shares' | 'engagement' = 'views'
 ): T[] {

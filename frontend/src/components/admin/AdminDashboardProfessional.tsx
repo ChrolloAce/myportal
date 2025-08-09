@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { professionalTheme } from '../../styles/professionalTheme';
-import { Card } from '../../styles/ProfessionalStyles';
+// import { Card } from '../../styles/ProfessionalStyles'; // Unused
 import { FirebaseSubmissionManager } from '../../firebase/FirebaseSubmissionManager';
 import { AdminUser, VideoSubmission, SubmissionStats } from '../../types';
 import { AdminSidebar } from './AdminSidebarProfessional';
@@ -18,9 +18,7 @@ import { TikTokAnalytics } from './TikTokAnalytics';
 import { CorporationMembers } from './CorporationMembers';
 import { InviteManagement } from './InviteManagementProfessional';
 import { AgencySettings } from './AgencySettings';
-import { 
-  Users
-} from 'lucide-react';
+// Removed unused imports
 
 interface AdminDashboardProps {
   user: AdminUser;
