@@ -92,7 +92,7 @@ const WarningBox = styled.div`
 `;
 
 const WarningText = styled.div`
-  color: ${professionalTheme.colors.warning[800]};
+  color: ${professionalTheme.colors.warning[700]};
   font-size: ${professionalTheme.typography.fontSize.sm};
   line-height: ${professionalTheme.typography.lineHeight.relaxed};
 `;

@@ -14,7 +14,7 @@ import { SubmissionManagement } from './SubmissionManagementProfessional';
 import { AdminOverview } from './AdminOverviewProfessional';
 import { UserManagement } from './UserManagementProfessional';
 import { AdminStatistics } from './AdminStatisticsProfessional';
-import { TikTokAnalytics } from './TikTokAnalytics';
+import { SimpleTikTokAnalytics } from './SimpleTikTokAnalytics';
 import { CorporationMembers } from './CorporationMembers';
 import { InviteManagement } from './InviteManagementProfessional';
 import { AgencySettings } from './AgencySettings';
@@ -257,7 +257,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
       case 'statistics':
         return <AdminStatistics stats={stats} submissions={submissions} />;
       case 'analytics':
-        return <TikTokAnalytics submissions={submissions} accessToken={process.env.REACT_APP_TIKTOK_ACCESS_TOKEN} />;
+        return <SimpleTikTokAnalytics submissions={submissions} />;
       case 'users':
         return <UserManagement />;
       case 'members':
