@@ -14,17 +14,12 @@ import { SubmissionManagement } from './SubmissionManagementProfessional';
 import { AdminOverview } from './AdminOverviewProfessional';
 import { UserManagement } from './UserManagementProfessional';
 import { AdminStatistics } from './AdminStatisticsProfessional';
+import { TikTokAnalytics } from './TikTokAnalytics';
 import { CorporationMembers } from './CorporationMembers';
 import { InviteManagement } from './InviteManagementProfessional';
 import { AgencySettings } from './AgencySettings';
 import { 
-  Users,
-  TrendingUp,
-  Award,
-  Zap,
-  Crown,
-  Shield,
-  UserCheck
+  Users
 } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -32,7 +27,7 @@ interface AdminDashboardProps {
   onLogout: () => void;
 }
 
-type AdminView = 'overview' | 'submissions' | 'statistics' | 'users' | 'members' | 'invites' | 'settings';
+type AdminView = 'overview' | 'submissions' | 'statistics' | 'analytics' | 'users' | 'members' | 'invites' | 'settings';
 
 // Professional Dashboard Layout with Gradient
 const DashboardLayout = styled.div`
@@ -112,85 +107,7 @@ const ContentArea = styled.div`
   position: relative;
 `;
 
-// Beautiful Stats Cards
-const StatsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: ${professionalTheme.spacing[6]};
-  margin-bottom: ${professionalTheme.spacing[8]};
-`;
 
-const StatCard = styled(Card)<{ gradient: string }>`
-  padding: ${professionalTheme.spacing[6]};
-  text-align: center;
-  background: ${props => props.gradient};
-  border: none;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 100%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-  
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: ${professionalTheme.shadows.xl};
-    
-    &::before {
-      opacity: 1;
-    }
-  }
-`;
-
-const StatIcon = styled.div`
-  width: 64px;
-  height: 64px;
-  margin: 0 auto ${professionalTheme.spacing[4]};
-  background: rgba(255, 255, 255, 0.2);
-  color: ${professionalTheme.colors.white};
-  border-radius: ${professionalTheme.borderRadius.xl};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: ${professionalTheme.shadows.md};
-`;
-
-const StatValue = styled.div`
-  font-size: ${professionalTheme.typography.fontSize['3xl']};
-  font-weight: ${professionalTheme.typography.fontWeight.bold};
-  color: ${professionalTheme.colors.white};
-  margin-bottom: ${professionalTheme.spacing[1]};
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-`;
-
-const StatLabel = styled.div`
-  font-size: ${professionalTheme.typography.fontSize.sm};
-  color: rgba(255, 255, 255, 0.9);
-  font-weight: ${professionalTheme.typography.fontWeight.medium};
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-`;
-
-const StatTrend = styled.div<{ isPositive: boolean }>`
-  font-size: ${professionalTheme.typography.fontSize.xs};
-  color: ${props => props.isPositive ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.7)'};
-  margin-top: ${professionalTheme.spacing[2]};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: ${professionalTheme.spacing[1]};
-`;
 
 // Mobile overlay for sidebar
 const MobileOverlay = styled.div<{ isOpen: boolean }>`
@@ -285,6 +202,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
           title: 'Analytics & Statistics',
           subtitle: 'Track performance metrics and analyze trends across your organization.'
         };
+      case 'analytics':
+        return {
+          title: 'TikTok Analytics',
+          subtitle: 'View detailed performance metrics for approved TikTok videos.'
+        };
       case 'users':
         return {
           title: 'User Management',
@@ -336,6 +258,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
         );
       case 'statistics':
         return <AdminStatistics stats={stats} submissions={submissions} />;
+      case 'analytics':
+        return <TikTokAnalytics submissions={submissions} accessToken={process.env.REACT_APP_TIKTOK_ACCESS_TOKEN} />;
       case 'users':
         return <UserManagement />;
       case 'members':
@@ -397,58 +321,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
             <PageSubtitle>{subtitle}</PageSubtitle>
           </PageHeader>
 
-          {/* Beautiful Stats Cards */}
-          {currentView === 'overview' && stats && (
-            <StatsGrid>
-              <StatCard gradient={`linear-gradient(135deg, ${professionalTheme.colors.primary[500]} 0%, ${professionalTheme.colors.primary[600]} 100%)`}>
-                <StatIcon>
-                  <Crown size={28} />
-                </StatIcon>
-                <StatValue>{stats.total || 0}</StatValue>
-                <StatLabel>Total Submissions</StatLabel>
-                <StatTrend isPositive={true}>
-                  <TrendingUp size={12} />
-                  +12% this month
-                </StatTrend>
-              </StatCard>
 
-              <StatCard gradient={`linear-gradient(135deg, ${professionalTheme.colors.success[500]} 0%, ${professionalTheme.colors.success[600]} 100%)`}>
-                <StatIcon>
-                  <Award size={28} />
-                </StatIcon>
-                <StatValue>{stats.approved || 0}</StatValue>
-                <StatLabel>Approved Content</StatLabel>
-                <StatTrend isPositive={true}>
-                  <TrendingUp size={12} />
-                  +8% this week
-                </StatTrend>
-              </StatCard>
-
-              <StatCard gradient={`linear-gradient(135deg, ${professionalTheme.colors.warning[500]} 0%, ${professionalTheme.colors.warning[600]} 100%)`}>
-                <StatIcon>
-                  <Zap size={28} />
-                </StatIcon>
-                <StatValue>{stats.pending || 0}</StatValue>
-                <StatLabel>Pending Review</StatLabel>
-                <StatTrend isPositive={false}>
-                  <Shield size={12} />
-                  Awaiting action
-                </StatTrend>
-              </StatCard>
-
-              <StatCard gradient={`linear-gradient(135deg, ${professionalTheme.colors.gray[600]} 0%, ${professionalTheme.colors.gray[700]} 100%)`}>
-                <StatIcon>
-                  <Users size={28} />
-                </StatIcon>
-                <StatValue>{user.corporationId ? '12' : '0'}</StatValue>
-                <StatLabel>Team Members</StatLabel>
-                <StatTrend isPositive={true}>
-                  <UserCheck size={12} />
-                  3 active today
-                </StatTrend>
-              </StatCard>
-            </StatsGrid>
-          )}
 
           <ContentArea>
             {renderCurrentView()}

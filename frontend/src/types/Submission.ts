@@ -29,6 +29,9 @@ export interface VideoSubmission {
   submittedAt: string;
   reviewedAt?: string;
   updatedAt: string;
+  // TikTok-specific fields
+  tiktokVideoId?: string;
+  tiktokAnalytics?: TikTokVideoMetrics;
 }
 
 export interface SubmissionFormData {
@@ -74,4 +77,49 @@ export interface AdminAction {
   submissionId: string;
   action: 'approve' | 'reject';
   feedback?: string;
+}
+
+// TikTok Analytics Types
+export interface TikTokVideoMetrics {
+  views: number;
+  likes: number;
+  comments: number;
+  shares: number;
+  engagementRate: number;
+  lastUpdated: string;
+}
+
+export interface TikTokVideoData {
+  id: string;
+  title: string;
+  description: string;
+  duration: number;
+  createdAt: string;
+  coverImageUrl: string;
+  shareUrl: string;
+  embedLink?: string;
+  width: number;
+  height: number;
+  metrics: TikTokVideoMetrics;
+}
+
+export interface TikTokAnalyticsResponse {
+  videoId: string;
+  submissionId: string;
+  data: TikTokVideoData;
+  error?: string;
+}
+
+export interface AnalyticsStats {
+  totalViews: number;
+  totalLikes: number;
+  totalComments: number;
+  totalShares: number;
+  averageEngagement: number;
+  topPerformer: {
+    videoId: string;
+    title: string;
+    views: number;
+  } | null;
+  viralVideos: number; // Videos with >100K views
 }

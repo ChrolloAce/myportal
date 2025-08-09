@@ -16,7 +16,8 @@ import {
   Award,
   Mail,
   Shield,
-  TrendingUp
+  TrendingUp,
+  BarChart3
 } from 'lucide-react';
 import { AdminUser } from '../../types';
 
@@ -242,6 +243,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
         { id: 'overview', label: 'Dashboard', icon: Sparkles },
         { id: 'submissions', label: 'Content Hub', icon: Award },
         { id: 'statistics', label: 'Analytics', icon: TrendingUp },
+        { id: 'analytics', label: 'TikTok Analytics', icon: BarChart3 },
       ]
     },
     {
