@@ -13,6 +13,7 @@ import { DatabaseManager } from './managers/DatabaseManager';
 import { authRoutes } from './routes/auth';
 import { submissionRoutes } from './routes/submissions';
 import { userRoutes } from './routes/users';
+import tiktokRoutes from './routes/tiktok';
 import { errorHandler } from './middleware/errorHandler';
 import { requestLogger } from './middleware/requestLogger';
 
@@ -83,6 +84,7 @@ class Server {
     this.app.use('/api/auth', authRoutes);
     this.app.use('/api/submissions', submissionRoutes);
     this.app.use('/api/users', userRoutes);
+    this.app.use('/api/tiktok', tiktokRoutes);
 
     // Catch-all handler for SPA routing (in production)
     if (process.env.NODE_ENV === 'production') {

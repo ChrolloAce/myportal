@@ -50,9 +50,14 @@ export class SimpleTikTokManager {
       
       // Try to fetch from TikTok API, but handle CORS gracefully
       try {
-        const response = await fetch(`https://www.tiktok.com/api/item/detail/?itemId=${videoId}`, {
+        // Use your backend proxy to bypass CORS
+        const backendUrl = process.env.NODE_ENV === 'production' 
+          ? 'https://your-backend-domain.com' 
+          : 'http://localhost:3001';
+        
+        const response = await fetch(`${backendUrl}/api/tiktok/video/${videoId}`, {
           headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            'Content-Type': 'application/json'
           }
         });
 
@@ -62,25 +67,8 @@ export class SimpleTikTokManager {
 
         const data = await response.json();
         
-        if (!data.itemInfo?.itemStruct) {
-          throw new Error('Invalid video data received');
-        }
-
-        const video = data.itemInfo.itemStruct;
-        
-        return {
-          id: video.id,
-          title: video.desc || 'Untitled Video',
-          description: video.desc || '',
-          author: video.author?.uniqueId || 'Unknown',
-          viewCount: parseInt(video.stats?.playCount || '0'),
-          likeCount: parseInt(video.stats?.diggCount || '0'),
-          shareCount: parseInt(video.stats?.shareCount || '0'),
-          commentCount: parseInt(video.stats?.commentCount || '0'),
-          createTime: video.createTime,
-          coverUrl: video.video?.cover || '',
-          videoUrl: video.video?.playAddr || ''
-        };
+        // Backend returns formatted data directly
+        return data;
         
       } catch (apiError) {
         console.warn('⚠️ TikTok API failed (likely CORS), using mock data:', apiError);
