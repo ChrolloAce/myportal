@@ -398,28 +398,28 @@ export const AdminVideoUpload: React.FC<AdminVideoUploadProps> = ({ user }) => {
         urls.push({ url: formData.instagramUrl.trim(), platform: Platform.INSTAGRAM });
       }
 
-      // Create submissions for each URL
-      for (const { url, platform } of urls) {
-        // Create a pre-approved submission assigned to the selected user
-        const submissionData = {
-          creatorId: formData.assignedUserId,
-          creatorUsername: creators.find(c => c.id === formData.assignedUserId)?.username || 'Assigned User',
-          videoUrl: url,
-          platform,
-          caption: formData.caption || undefined,
-          hashtags: formData.hashtags ? formData.hashtags.split(',').map(tag => tag.trim()) : undefined,
-          notes: formData.notes || `Admin upload assigned to user. ${formData.notes}`.trim(),
-          status: 'approved' as const,
-          adminId: user.id,
-          adminFeedback: 'Pre-approved by admin',
-          reviewedAt: new Date().toISOString()
-        };
-
-        // TODO: Create the submission with admin override
-        console.log('Creating admin submission:', submissionData);
+      // Create submissions using the admin submission method
+      const selectedCreator = creators.find(c => c.id === formData.assignedUserId);
+      if (!selectedCreator) {
+        throw new Error('Selected creator not found');
       }
 
-      setSuccess(`Successfully uploaded and assigned ${urls.length} video${urls.length > 1 ? 's' : ''} to user!`);
+      const submissions = await submissionManager.createAdminSubmission(
+        user.id,
+        formData.assignedUserId,
+        selectedCreator.username,
+        {
+          tiktokUrl: formData.tiktokUrl,
+          instagramUrl: formData.instagramUrl,
+          caption: formData.caption,
+          hashtags: formData.hashtags,
+          notes: formData.notes
+        }
+      );
+
+      console.log('✅ Created admin submissions:', submissions.length);
+
+      setSuccess(`Successfully uploaded and assigned ${submissions.length} video${submissions.length > 1 ? 's' : ''} to ${selectedCreator.username}!`);
       
       // Reset form
       setFormData({

@@ -128,6 +128,98 @@ export class FirebaseSubmissionManager {
     }
   }
 
+  /**
+   * Admin method to create pre-approved submissions for creators
+   */
+  public async createAdminSubmission(
+    adminId: string,
+    creatorId: string,
+    creatorUsername: string,
+    formData: SubmissionFormData
+  ): Promise<VideoSubmission[]> {
+    const currentUser = this.authManager.getCurrentUser();
+    if (!currentUser || currentUser.role !== 'admin') {
+      throw new Error('Only admins can create pre-approved submissions');
+    }
+
+    try {
+      const urls: { url: string; platform: Platform }[] = [];
+      
+      // Collect all valid URLs
+      if (formData.tiktokUrl?.trim()) {
+        urls.push({ url: formData.tiktokUrl.trim(), platform: Platform.TIKTOK });
+      }
+      if (formData.instagramUrl?.trim()) {
+        urls.push({ url: formData.instagramUrl.trim(), platform: Platform.INSTAGRAM });
+      }
+
+      if (urls.length === 0) {
+        throw new Error('At least one URL must be provided');
+      }
+
+      // Check for duplicate URLs
+      for (const { url } of urls) {
+        const duplicateQuery = query(
+          collection(db, 'submissions'),
+          where('videoUrl', '==', url)
+        );
+        const duplicateSnapshot = await getDocs(duplicateQuery);
+        
+        if (!duplicateSnapshot.empty) {
+          throw new Error(`This URL has already been submitted: ${url}`);
+        }
+      }
+
+      const submissions: VideoSubmission[] = [];
+
+      // Create a submission for each URL
+      for (const { url, platform } of urls) {
+        const submissionData = {
+          creatorId,
+          creatorUsername,
+          videoUrl: url,
+          platform,
+          caption: formData.caption || '',
+          hashtags: this.parseHashtags(formData.hashtags || ''),
+          notes: formData.notes || '',
+          status: SubmissionStatus.APPROVED, // Pre-approved by admin
+          adminId,
+          adminFeedback: 'Pre-approved by admin',
+          reviewedAt: Timestamp.now(),
+          submittedAt: Timestamp.now(),
+          updatedAt: Timestamp.now(),
+          isAdminUpload: true,
+          assignedByAdmin: true
+        };
+
+        const docRef = await addDoc(collection(db, 'submissions'), submissionData);
+
+        submissions.push({
+          id: docRef.id,
+          ...submissionData,
+          submittedAt: submissionData.submittedAt.toDate().toISOString(),
+          updatedAt: submissionData.updatedAt.toDate().toISOString(),
+          reviewedAt: submissionData.reviewedAt.toDate().toISOString()
+        } as VideoSubmission);
+      }
+
+      // Update creator's submission count
+      const userDocRef = doc(db, 'users', creatorId);
+      await updateDoc(userDocRef, {
+        totalSubmissions: increment(submissions.length),
+        approvedSubmissions: increment(submissions.length), // All admin uploads are approved
+        updatedAt: Timestamp.now()
+      });
+
+      console.log(`✅ Created ${submissions.length} admin submission(s) for creator ${creatorUsername}`);
+      return submissions;
+
+    } catch (error) {
+      console.error('❌ Error creating admin submission:', error);
+      throw new Error(error instanceof Error ? error.message : 'Admin submission failed');
+    }
+  }
+
   public async getSubmissions(
     filters: SubmissionFilters = {},
     page = 1,
