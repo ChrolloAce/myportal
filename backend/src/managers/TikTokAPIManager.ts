@@ -1,7 +1,9 @@
 /**
- * TikTokAPIManager - Frontend-only TikTok API integration
- * Uses official TikTok for Developers API directly from frontend
+ * TikTokAPIManager - Official TikTok API integration
+ * Uses official TikTok for Developers API with sandbox credentials
  */
+
+import fetch from 'node-fetch';
 
 interface TikTokVideoInfo {
   id: string;
@@ -49,13 +51,11 @@ export class TikTokAPIManager {
   private clientKey: string;
   private clientSecret: string;
   private accessToken: string | null = null;
-  private tokenExpiry: number = 0;
   private baseUrl = 'https://open.tiktokapis.com/v2';
 
   private constructor() {
-    // Use hardcoded credentials (can be moved to env vars later)
-    this.clientKey = 'sbaw6qi55kaqklt0d5';
-    this.clientSecret = 'LP9VknaI4xzc4LwIpkdyY8lBYAI4aMhJ';
+    this.clientKey = process.env.TIKTOK_CLIENT_KEY || 'sbaw6qi55kaqklt0d5';
+    this.clientSecret = process.env.TIKTOK_CLIENT_SECRET || 'LP9VknaI4xzc4LwIpkdyY8lBYAI4aMhJ';
   }
 
   public static getInstance(): TikTokAPIManager {
@@ -70,18 +70,10 @@ export class TikTokAPIManager {
    */
   private async getClientCredentialsToken(): Promise<string> {
     try {
-      // Check if we have a valid token
-      if (this.accessToken && Date.now() < this.tokenExpiry) {
-        return this.accessToken;
-      }
-
-      console.log('🔑 Getting TikTok client credentials token...');
-
       const response = await fetch('https://open.tiktokapis.com/v2/oauth/token/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Cache-Control': 'no-cache',
         },
         body: new URLSearchParams({
           client_key: this.clientKey,
@@ -97,9 +89,6 @@ export class TikTokAPIManager {
       }
 
       this.accessToken = data.access_token;
-      // Set expiry to 90% of actual expiry time for safety
-      this.tokenExpiry = Date.now() + (data.expires_in * 1000 * 0.9);
-      
       console.log('✅ TikTok client credentials token obtained');
       return data.access_token;
 
@@ -116,14 +105,16 @@ export class TikTokAPIManager {
     try {
       console.log('🎵 Fetching TikTok video info via official API:', videoId);
 
-      // Get access token
-      const token = await this.getClientCredentialsToken();
+      // Get access token if we don't have one
+      if (!this.accessToken) {
+        await this.getClientCredentialsToken();
+      }
 
-      // Use TikTok's Research API (Query Videos endpoint)
+      // Use TikTok's Query Videos endpoint
       const response = await fetch(`${this.baseUrl}/research/video/query/`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${this.accessToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -181,8 +172,8 @@ export class TikTokAPIManager {
     } catch (error) {
       console.error('❌ Error fetching TikTok video info:', error);
       
-      // Return mock data as fallback
-      return this.getMockVideoData(videoId);
+      // Return null so the caller can handle the error
+      return null;
     }
   }
 
@@ -193,7 +184,9 @@ export class TikTokAPIManager {
     try {
       console.log('🎵 Fetching multiple TikTok videos via official API:', videoIds.length);
 
-      const token = await this.getClientCredentialsToken();
+      if (!this.accessToken) {
+        await this.getClientCredentialsToken();
+      }
 
       // TikTok API supports up to 20 video IDs per request
       const batchSize = 20;
@@ -205,7 +198,7 @@ export class TikTokAPIManager {
         const response = await fetch(`${this.baseUrl}/research/video/query/`, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${token}`,
+            'Authorization': `Bearer ${this.accessToken}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
@@ -249,11 +242,6 @@ export class TikTokAPIManager {
           results.push(...batchResults);
         } else {
           console.warn('Failed to fetch batch:', data.error);
-          // Add mock data for failed requests
-          batch.forEach(videoId => {
-            const mockData = this.getMockVideoData(videoId);
-            if (mockData) results.push(mockData);
-          });
         }
       }
 
@@ -262,22 +250,17 @@ export class TikTokAPIManager {
 
     } catch (error) {
       console.error('❌ Error fetching multiple TikTok videos:', error);
-      // Return mock data for all videos
-      return videoIds.map(videoId => this.getMockVideoData(videoId)).filter(Boolean) as TikTokVideoInfo[];
+      return [];
     }
   }
 
   /**
-   * Get video info from URL (extracts video ID automatically)
+   * Extract hashtags from video description
    */
-  public async getVideoInfoFromUrl(url: string): Promise<TikTokVideoInfo | null> {
-    const videoId = this.extractVideoId(url);
-    if (!videoId) {
-      console.error('Could not extract video ID from URL:', url);
-      return null;
-    }
-    
-    return this.getVideoInfo(videoId);
+  private extractHashtags(description: string): string[] {
+    const hashtagRegex = /#[\w\u0590-\u05ff]+/g;
+    const hashtags = description.match(hashtagRegex);
+    return hashtags ? hashtags.map(tag => tag.substring(1)) : [];
   }
 
   /**
@@ -304,34 +287,5 @@ export class TikTokAPIManager {
     }
 
     return null;
-  }
-
-  /**
-   * Extract hashtags from video description
-   */
-  private extractHashtags(description: string): string[] {
-    const hashtagRegex = /#[\w\u0590-\u05ff]+/g;
-    const hashtags = description.match(hashtagRegex);
-    return hashtags ? hashtags.map(tag => tag.substring(1)) : [];
-  }
-
-  /**
-   * Generate mock data for fallback
-   */
-  private getMockVideoData(videoId: string): TikTokVideoInfo {
-    return {
-      id: videoId,
-      title: 'TikTok Video (Sandbox Mode)',
-      description: 'Sample data - TikTok API sandbox/fallback mode',
-      author: 'sandbox_user',
-      viewCount: Math.floor(Math.random() * 1000000) + 50000,
-      likeCount: Math.floor(Math.random() * 80000) + 5000,
-      shareCount: Math.floor(Math.random() * 15000) + 1000,
-      commentCount: Math.floor(Math.random() * 8000) + 500,
-      createTime: Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000,
-      coverUrl: '',
-      videoUrl: `https://www.tiktok.com/@user/video/${videoId}`,
-      hashtags: ['sandbox', 'demo', 'test']
-    };
   }
 }

@@ -1,17 +1,17 @@
 /**
- * TikTok API Proxy - Bypass CORS by proxying through backend
+ * TikTok API Routes - Official TikTok API integration
  */
 
 import { Router, Request, Response } from 'express';
-import fetch from 'node-fetch';
+import { TikTokAPIManager } from '../managers/TikTokAPIManager';
 
 const router = Router();
 
 /**
  * GET /api/tiktok/video/:videoId
- * Proxy TikTok API requests to bypass CORS
+ * Get TikTok video data using official API
  */
-router.get('/video/:videoId', async (req: Request, res: Response) => {
+router.get('/video/:videoId', async (req: Request, res: Response): Promise<void> => {
   try {
     const { videoId } = req.params;
     
@@ -19,64 +19,23 @@ router.get('/video/:videoId', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Video ID is required' });
     }
 
-    console.log('🎵 Proxying TikTok request for video:', videoId);
+    console.log('🎵 Fetching TikTok video via official API:', videoId);
 
-    // Fetch from TikTok API (server-side, no CORS restrictions)
-    const response = await fetch(`https://www.tiktok.com/api/item/detail/?itemId=${videoId}`, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        'Accept': 'application/json, text/plain, */*',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache',
-        'Referer': 'https://www.tiktok.com/',
-        'Sec-Fetch-Dest': 'empty',
-        'Sec-Fetch-Mode': 'cors',
-        'Sec-Fetch-Site': 'same-origin'
-      }
-    });
+    const tiktokManager = TikTokAPIManager.getInstance();
+    const videoData = await tiktokManager.getVideoInfo(videoId);
 
-    if (!response.ok) {
-      throw new Error(`TikTok API returned ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    // Validate response structure
-    if (!data.itemInfo?.itemStruct) {
+    if (!videoData) {
       return res.status(404).json({ 
-        error: 'Video not found or invalid response',
+        error: 'Video not found or API request failed',
         videoId 
       });
     }
 
-    const video = data.itemInfo.itemStruct;
-
-    // Return formatted response
-    const formattedResponse = {
-      id: video.id,
-      title: video.desc || 'Untitled Video',
-      description: video.desc || '',
-      author: video.author?.uniqueId || 'Unknown',
-      viewCount: parseInt(video.stats?.playCount || '0'),
-      likeCount: parseInt(video.stats?.diggCount || '0'),
-      shareCount: parseInt(video.stats?.shareCount || '0'),
-      commentCount: parseInt(video.stats?.commentCount || '0'),
-      createTime: video.createTime,
-      coverUrl: video.video?.cover || '',
-      videoUrl: video.video?.playAddr || '',
-      hashtags: video.textExtra?.filter((item: any) => item.hashtagName)?.map((item: any) => item.hashtagName) || [],
-      music: video.music ? {
-        title: video.music.title,
-        author: video.music.authorName
-      } : null
-    };
-
-    console.log('✅ Successfully fetched TikTok data:', formattedResponse.title);
-    res.json(formattedResponse);
+    console.log('✅ Successfully fetched TikTok data:', videoData.title);
+    res.json(videoData);
 
   } catch (error) {
-    console.error('❌ Error proxying TikTok request:', error);
+    console.error('❌ Error fetching TikTok video:', error);
     res.status(500).json({ 
       error: 'Failed to fetch TikTok data',
       message: error instanceof Error ? error.message : 'Unknown error'
@@ -85,10 +44,10 @@ router.get('/video/:videoId', async (req: Request, res: Response) => {
 });
 
 /**
- * GET /api/tiktok/multiple
- * Fetch multiple TikTok videos at once
+ * POST /api/tiktok/multiple
+ * Fetch multiple TikTok videos at once using official API
  */
-router.post('/multiple', async (req: Request, res: Response) => {
+router.post('/multiple', async (req: Request, res: Response): Promise<void> => {
   try {
     const { videoIds } = req.body;
 
@@ -96,19 +55,10 @@ router.post('/multiple', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Video IDs array is required' });
     }
 
-    console.log('🎵 Fetching multiple TikTok videos:', videoIds.length);
+    console.log('🎵 Fetching multiple TikTok videos via official API:', videoIds.length);
 
-    const results = await Promise.allSettled(
-      videoIds.map(async (videoId: string) => {
-        const response = await fetch(`http://localhost:${process.env.PORT || 3001}/api/tiktok/video/${videoId}`);
-        if (!response.ok) throw new Error(`Failed to fetch ${videoId}`);
-        return response.json();
-      })
-    );
-
-    const videos = results
-      .filter((result): result is PromiseFulfilledResult<any> => result.status === 'fulfilled')
-      .map(result => result.value);
+    const tiktokManager = TikTokAPIManager.getInstance();
+    const videos = await tiktokManager.getMultipleVideoInfo(videoIds);
 
     res.json({ videos, total: videos.length });
 
@@ -116,6 +66,52 @@ router.post('/multiple', async (req: Request, res: Response) => {
     console.error('❌ Error fetching multiple TikTok videos:', error);
     res.status(500).json({ 
       error: 'Failed to fetch multiple TikTok videos',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
+ * POST /api/tiktok/video-from-url
+ * Get TikTok video data from URL (extracts video ID automatically)
+ */
+router.post('/video-from-url', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { url } = req.body;
+    
+    if (!url) {
+      return res.status(400).json({ error: 'TikTok URL is required' });
+    }
+
+    console.log('🎵 Extracting video ID from URL:', url);
+
+    const tiktokManager = TikTokAPIManager.getInstance();
+    const videoId = tiktokManager.extractVideoId(url);
+
+    if (!videoId) {
+      return res.status(400).json({ 
+        error: 'Invalid TikTok URL format',
+        url 
+      });
+    }
+
+    const videoData = await tiktokManager.getVideoInfo(videoId);
+
+    if (!videoData) {
+      return res.status(404).json({ 
+        error: 'Video not found or API request failed',
+        videoId,
+        url
+      });
+    }
+
+    console.log('✅ Successfully fetched TikTok data from URL:', videoData.title);
+    res.json(videoData);
+
+  } catch (error) {
+    console.error('❌ Error fetching TikTok video from URL:', error);
+    res.status(500).json({ 
+      error: 'Failed to fetch TikTok data from URL',
       message: error instanceof Error ? error.message : 'Unknown error'
     });
   }
